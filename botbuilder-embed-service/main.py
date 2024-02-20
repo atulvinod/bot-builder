@@ -7,7 +7,9 @@ import json
 
 from dotenv import load_dotenv
 
-load_dotenv()
+if os.getenv("DB_HOST") is None:
+    load_dotenv()
+
 logging.basicConfig(
      level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',  

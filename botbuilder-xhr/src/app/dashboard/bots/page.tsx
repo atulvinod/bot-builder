@@ -30,6 +30,7 @@ export default async function ViewBotsPage() {
                         bot_description={m.description}
                         bot_name={m.name}
                         bot_id={m.id}
+                        status={m.status ?? "queued"}
                     />
                 ))}
             </div>
