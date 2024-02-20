@@ -29,6 +29,6 @@ while True:
     else:
         logging.info('Received task')
         task = json.loads(queue_value)
-        bot_id = task.bot_id
-        logging.info('Processing bot '+task.bot_id)
+        bot_id = task['bot_id']
+        logging.info('Processing bot '+str(bot_id))
         bot_trainer.process(bot_id)

@@ -53,7 +53,6 @@ class BotTrainer:
         training_files_directory = self.__createTrainingFilesDirectory(training_asset_directory)
         downloaded_asset_path = self.storage.downloadTrainingAsset(bot_data_id, training_asset_directory,TrainingAssetDefinitions.Files.value)
         self.__extractAssetsZipToTrainingDir(training_files_directory, downloaded_asset_path)
-        
         pinecone_index = self.__getPineconeIndex(bot_id, TrainingAssetTypes.Files)
         logging.info("Reading training files")
         training_files = SimpleDirectoryReader(input_dir=training_files_directory, recursive=True).load_data(show_progress=True)
@@ -61,7 +60,6 @@ class BotTrainer:
         pinecone_storage_context = StorageContext.from_defaults(vector_store=pinecone_vector_store)
         logging.info("Building vector index from training files")
         VectorStoreIndex.from_documents(documents=training_files,storage_context=pinecone_storage_context)   
-
 
     def __processTrainingData(self, bot_id:int ,bot_data_id: str ,training_spec: List[str]):
         training_asset_directory = self.storage.createTrainingAssetDirectory(bot_data_id)
@@ -77,8 +75,7 @@ class BotTrainer:
             self.updateBotStatus(bot_id, BotStatus.InProgress)
             bot_details = self.db.getBotDetailsById(bot_id)
             bot_spec = json.loads(bot_details.spec)
-            # TODO: Set to training_spec
-            training_spec = bot_spec['training_inputs']
+            training_spec = bot_spec['training_spec']
             data_id = bot_spec['data_id']
             self.__processTrainingData(bot_id, data_id ,training_spec)
             self.updateBotStatus(bot_id, BotStatus.Created)
