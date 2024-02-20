@@ -32,8 +32,11 @@ export default function BotDescription({
                     </p>
                 </div>
                 <div className="mt-3">
-                    {status == "queued" && (
-                        <Badge variant={"outline"} className="bg-yellow-100 h-7">
+                    {["queued", "inprogress"].includes(status) && (
+                        <Badge
+                            variant={"outline"}
+                            className="bg-yellow-100 h-7"
+                        >
                             Processing
                         </Badge>
                     )}
@@ -41,14 +44,12 @@ export default function BotDescription({
                         <Badge variant={"outline"} className="bg-green-400 h-7">
                             Open
                             <Image
-                            alt="Open"
-                            src={openExternalSvg}
-                            height={12}
-                            width={12}
-                            className="ml-1"
-                            >
-
-                            </Image>
+                                alt="Open"
+                                src={openExternalSvg}
+                                height={12}
+                                width={12}
+                                className="ml-1"
+                            ></Image>
                         </Badge>
                     )}
                 </div>

@@ -30,6 +30,5 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/appenv
-**/.env
 LICENSE
 README.md

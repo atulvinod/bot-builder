@@ -19,25 +19,5 @@ services:
       context: ./botbuilder-embed-service
     ports:
       - 8000:8000
-    environment:
-      - NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB=1
-      - DB_HOST=database
-      - DB_USER=postgres
-      - DB_PASSWORD=mypassword
-      - DB_DATABASE=bot_builder
-      - DB_PORT=5432
-      - OPENAI_API_KEY=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
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_USER=
-      - REDIS_PASSWORD=
-      - FIREBASE_API_KEY=AIzaSyDt_xP9MtlTAobQEYqVAn_YAfE-f5Zzm9U
-      - FIREBASE_AUTH_DOMAIN=bot-builder-a057a.firebaseapp.com
-      - FIREBASE_PROJECT_ID=bot-builder-a057a
-      - FIREBASE_STORAGE_BUCKET=bot-builder-a057a.appspot.com
-      - FIREBASE_MESSAGE_SENDER_ID=533837367798
-      - FIREBASE_APP_ID=1:533837367798:web:b7410707a25e1d66d51fd7
-      - PINECONE_API_KEY="bc2a7a9f-1282-49bb-ad50-f998ccf5fad3"
-
 volumes:
   postgres-data:
