@@ -1,10 +1,10 @@
 "use client";
 
-import fileSvg from "../../svgs/file.svg";
+import fileSvg from "../../../svgs/file.svg";
 import Image from "next/image";
 import { Button, ButtonSize, ButtonVariants } from "./buttons";
 import { useRef, useState } from "react";
-import { bytesToMB, convertFileListToArray } from "./utils";
+import { bytesToMB, convertFileListToArray } from "../utils";
 import { toast } from "sonner";
 
 export default function FileTrainingDataInput({

@@ -1,4 +1,4 @@
-import { TrainingAssetTypes } from "../../lib/constants";
+import { TrainingAssetTypes } from "../../../lib/constants";
 
 export interface TrainingDataSchema<DataContainerType> {
     value: DataContainerType;

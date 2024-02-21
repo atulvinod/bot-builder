@@ -23,6 +23,7 @@ const config = {
                 appParrot: "#94F292",
                 appDangerRed: "#FF3333",
                 appGrey: "#F0F4F9",
+                appLightBlue:"#D8F7FE",
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",

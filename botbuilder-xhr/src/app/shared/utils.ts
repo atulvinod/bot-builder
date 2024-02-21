@@ -1,4 +1,4 @@
-import { TrainingDataSchema } from "./interfaces";
+import { TrainingDataSchema } from "./components/interfaces";
 import { config } from "dotenv";
 import { TrainingAssetTypes } from "../../lib/constants";
 export class TrainingFilesInputConfig implements TrainingDataSchema<File[]> {

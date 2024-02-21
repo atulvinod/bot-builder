@@ -1,5 +1,5 @@
 import { ComponentProps, ElementType, ReactElement } from "react";
-import sparking from "../../svgs/sparkling.svg";
+import sparking from "../../../svgs/sparkling.svg";
 import Image from "next/image";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Loader2 } from "lucide-react";
@@ -14,6 +14,7 @@ export enum ButtonVariants {
 export enum ButtonSize {
     Normal,
     Small,
+    MaxHeight,
 }
 
 function getSVGIcon(source: string | StaticImport) {
@@ -66,6 +67,9 @@ const buttonSizeConfigs = {
     [ButtonSize.Small]: {
         height: "h-8",
     },
+    [ButtonSize.MaxHeight]: {
+        height: "h-full",
+    },
 };
 
 export function Button({
@@ -78,7 +82,7 @@ export function Button({
     sizeConfigOverrides,
     ...props
 }: {
-    buttonText: string;
+    buttonText?: string;
     variant?: ButtonVariants;
     size?: ButtonSize;
     icon?: ReactElement;

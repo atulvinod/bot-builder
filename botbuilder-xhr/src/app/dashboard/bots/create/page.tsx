@@ -1,8 +1,11 @@
 "use client";
 
 import { v4 as uuidv4 } from "uuid";
-import { Button as AppButton, ButtonVariants } from "@/app/shared/buttons";
-import HeadingWithSideActionButton from "@/app/shared/heading_with_side_action_button";
+import {
+    Button as AppButton,
+    ButtonVariants,
+} from "@/app/shared/components/buttons";
+import HeadingWithSideActionButton from "@/app/shared/components/heading_with_side_action_button";
 import {
     Form,
     FormControl,
@@ -18,9 +21,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import FileTrainingDataInput from "@/app/shared/file_training_data_input";
+import FileTrainingDataInput from "@/app/shared/components/file_training_data_input";
 import { useRef, useState } from "react";
-import { TrainingDataSchema } from "@/app/shared/interfaces";
+import { TrainingDataSchema } from "@/app/shared/components/interfaces";
 import { TrainingFilesInputConfig } from "@/app/shared/utils";
 import * as constants from "@/lib/constants";
 import { toast } from "sonner";

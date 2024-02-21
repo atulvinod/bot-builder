@@ -1,7 +1,7 @@
-import AvatarImage from "@/app/shared/avatar_image";
+import AvatarImage from "@/app/shared/components/avatar_image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import openExternalSvg from "../../../svgs/open-external.svg"
+import openExternalSvg from "../../../svgs/open-external.svg";
 import Image from "next/image";
 
 type botStatus = "queued" | "inprogress" | "created" | "failed";
