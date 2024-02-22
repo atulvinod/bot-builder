@@ -755,4 +755,5 @@ $RECYCLE.BIN/
 
 .env*
 appenv
+flaskenv
 firebase_service_account_config.json

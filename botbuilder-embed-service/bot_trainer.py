@@ -63,11 +63,13 @@ class BotTrainer:
 
     def __processTrainingData(self, bot_id:int ,bot_data_id: str ,training_spec: List[str]):
         training_asset_directory = self.storage.createTrainingAssetDirectory(bot_data_id)
+        
         for ts in training_spec:
             if (ts == TrainingAssetTypes.Files.value):
                 logging.info("Building vectors using training files")
                 self.__buildVectorsUsingFiles(training_asset_directory, bot_id,bot_data_id)
                 logging.info("Vectors built using training files")
+        
         shutil.rmtree(training_asset_directory)
     
     def process(self, bot_id: int):

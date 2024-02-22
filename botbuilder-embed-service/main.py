@@ -16,8 +16,12 @@ logging.basicConfig(
 )
 
 
-redis_client = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), username= os.getenv("REDIS_USER"), password=os.getenv("REDIS_PASSWORD"))
-
+redis_client = redis. Redis(
+            host=os.getenv("REDIS_HOST"),
+            port=os.getenv("REDIS_PORT"),
+            username= os.getenv("REDIS_USER"), 
+            password=os.getenv("REDIS_PASSWORD")
+            )
 
 bot_trainer = BotTrainer()
 logging.info('Running consumer')
