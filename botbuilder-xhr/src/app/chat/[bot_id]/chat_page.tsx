@@ -20,7 +20,6 @@ export default function ChatPage({
     bot_details: typeof schemas.botDetails.$inferSelect;
     chat_history: ChatMessage[];
 }) {
-    console.log(bot_details);
     const [history, setChatHistory] = useState(chat_history);
     const [enableInput, setInputEnabled] = useState(true);
     const [responseStream, setResponseStream] = useState<string | null>(null);
@@ -33,7 +32,6 @@ export default function ChatPage({
         animateScroll.scrollToBottom({
             containerId: "messages",
             animateScroll: true,
-            
         });
     }
 

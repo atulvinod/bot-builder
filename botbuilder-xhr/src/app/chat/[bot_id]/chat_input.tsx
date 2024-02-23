@@ -19,7 +19,7 @@ export function ChatInput({
     const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
     function handleSubmit() {
-        if (inputValue && inputValue.length == 0) {
+        if (!inputValue || inputValue.trim().length == 0) {
             return;
         }
         onSubmit(inputValue);
