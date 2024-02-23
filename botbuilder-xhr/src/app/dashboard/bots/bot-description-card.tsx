@@ -41,16 +41,21 @@ export default function BotDescription({
                         </Badge>
                     )}
                     {status == "created" && (
-                        <Badge variant={"outline"} className="bg-green-400 h-7">
-                            Open
-                            <Image
-                                alt="Open"
-                                src={openExternalSvg}
-                                height={12}
-                                width={12}
-                                className="ml-1"
-                            ></Image>
-                        </Badge>
+                        <Link href={`/chat/${bot_id}`}>
+                            <Badge
+                                variant={"outline"}
+                                className="bg-green-400 h-7"
+                            >
+                                Open
+                                <Image
+                                    alt="Open"
+                                    src={openExternalSvg}
+                                    height={12}
+                                    width={12}
+                                    className="ml-1"
+                                ></Image>
+                            </Badge>
+                        </Link>
                     )}
                 </div>
             </div>

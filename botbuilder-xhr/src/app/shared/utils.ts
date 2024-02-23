@@ -54,3 +54,9 @@ export function loadEnv() {
         path: "./.env.local",
     });
 }
+
+
+export interface ChatMessage {
+    role: "user" | "assistant";
+    content: string;
+}

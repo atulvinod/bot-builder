@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_cors import CORS
+
 import os
 from routes.bot import routeBlueprint
 from dotenv import load_dotenv
@@ -23,5 +25,5 @@ def create_app(test_config=None):
         pass
 
     app.register_blueprint(routeBlueprint)
-
+    CORS(app)
     return app

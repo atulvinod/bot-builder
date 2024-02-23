@@ -1,25 +1,21 @@
-import { db_client } from "@/lib/db";
-import * as schema from "../../../schemas/schemas";
-import { eq } from "drizzle-orm";
+"use client";
+
 import AvatarImage from "@/app/shared/components/avatar_image";
 import { Button, ButtonVariants } from "@/app/shared/components/buttons";
 import infoIcon from "../../../svgs/info.svg";
 import moreIcon from "../../../svgs/more.svg";
 import Image from "next/image";
+import ChatPanel from "./chat_panel";
 
-export default async function ChatPageLayout({
-    params,
-    children,
+export default function ChatPage({
+    botDetails,
+    chatHistory,
 }: {
-    params: { bot_id: number };
-    children: React.ReactNode;
+    botDetails: any;
+    chatHistory: any;
 }) {
-    const [botDetails] = await db_client
-        .select()
-        .from(schema.botDetails)
-        .where(eq(schema.botDetails.id, params.bot_id));
     return (
-        <div className="h-[100vh] flex flex-col">
+        <div className="flex flex-col">
             <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5">
                 <div className="flex flex-row items-center">
                     <AvatarImage />
@@ -61,7 +57,14 @@ export default async function ChatPageLayout({
                     </div>
                 </div>
             </nav>
-            <div className="h-full">{children}</div>
+            <div className="h-full">
+                <div className="h-full w-full px-96">
+                    <ChatPanel
+                        chat_history={chatHistory}
+                        bot_details={botDetails}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

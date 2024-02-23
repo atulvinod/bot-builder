@@ -11,6 +11,7 @@ from ..utils.constants import TrainingAssetTypes
 from ..utils.pinecone_client import PineconeClient
 from ..utils.redis_client import RedisClient
 from ..utils.db_client import DB
+from ..utils.util import convertChatMessagesToJSON
 import json
 
 db = DB().getClient()
@@ -58,8 +59,8 @@ def updateChatHistory(
 ):
     cacheKey = getHistoryCacheKey(bot_id)
     merged_history = chat_history + new_messages
-    history = [n.dict() for n in merged_history]
-    redis.set(cacheKey, json.dumps(history))
+    historyJson = convertChatMessagesToJSON(merged_history)
+    redis.set(cacheKey, historyJson)
 
 
 def getResponseForQuery(bot_id: int, user_question: str):

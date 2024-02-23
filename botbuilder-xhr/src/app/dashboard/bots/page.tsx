@@ -1,6 +1,6 @@
-import { Button, ButtonVariants } from "@/app/shared/buttons";
+import { Button, ButtonVariants } from "@/app/shared/components/buttons";
 import BotDescription from "./bot-description-card";
-import HeadingWithSideActionButton from "@/app/shared/heading_with_side_action_button";
+import HeadingWithSideActionButton from "@/app/shared/components/heading_with_side_action_button";
 import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";

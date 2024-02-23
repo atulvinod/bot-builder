@@ -1,38 +1,33 @@
-"use client";
-
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
-import { Loader2 } from "lucide-react";
-import { ChatInput } from "./chat_input";
-import ChatBubble from "./message_bubble";
-import ChatPanel from "./chat_panel";
+import { eq } from "drizzle-orm";
+import { ChatMessage } from "@/app/shared/utils";
+import ChatPage from "./chat_page";
 
-export default function ChatPage({ params }: { params: { bot_id: string } }) {
-    async function getBotDetails() {
-        const request = await fetch(`/api/bot?bot_id=${params.bot_id}`);
-        return request.json();
+export default async function ChatPageRoot({
+    params,
+}: {
+    params: { bot_id: number };
+}) {
+    const [botDetails] = await db_client
+        .select()
+        .from(schema.botDetails)
+        .where(eq(schema.botDetails.id, params.bot_id));
+
+    const chatHistoryRequest = await fetch(
+        `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}/bot/${params.bot_id}/history`,
+        { cache: "no-store" }
+    );
+
+    let chatHistory: ChatMessage[] = [];
+    if (chatHistoryRequest.ok) {
+        const requestBody = await chatHistoryRequest.json();
+        chatHistory = requestBody.data.history;
     }
 
-    const { data, isLoading } = useQuery<typeof schema.botDetails.$inferSelect>(
-        {
-            queryKey: ["chat-bot-details"],
-            queryFn: () => getBotDetails(),
-        }
-    );
-
     return (
-        <div className="h-full w-full px-96">
-            {isLoading && <Loader />}
-            {!isLoading && data && <ChatPanel bot_details={data} />}
-        </div>
-    );
-}
-
-function Loader() {
-    return (
-        <div className="flex items-center justify-center h-full w-full  ">
-            <Loader2 className="h-20 w-20 animate-spin" />
+        <div className="flex flex-col">
+            <ChatPage botDetails={botDetails} chatHistory={chatHistory} />
         </div>
     );
 }
