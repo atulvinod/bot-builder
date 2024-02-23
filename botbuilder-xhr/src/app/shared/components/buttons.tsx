@@ -14,7 +14,7 @@ export enum ButtonVariants {
 export enum ButtonSize {
     Normal,
     Small,
-    MaxHeight,
+    Large,
 }
 
 function getSVGIcon(source: string | StaticImport) {
@@ -67,8 +67,8 @@ const buttonSizeConfigs = {
     [ButtonSize.Small]: {
         height: "h-8",
     },
-    [ButtonSize.MaxHeight]: {
-        height: "h-full",
+    [ButtonSize.Large]: {
+        height: "h-10",
     },
 };
 
@@ -98,10 +98,12 @@ export function Button({
         ...buttonSizeConfigs[size],
         ...(sizeConfigOverrides ?? {}),
     };
+    const padding = buttonText ? "px-5" : ( size != ButtonSize.Large ? "p-3": "p-5");
+    const height = buttonText ? dimensions.height : "";
     return (
         <button
             type={type}
-            className={`bg-${style.bgColor} text-[${style.textColor}] ${dimensions.height} px-5 rounded-full flex flex-row items-center`}
+            className={`bg-${style.bgColor} text-[${style.textColor}] ${height} ${padding} rounded-full flex flex-row items-center`}
             {...props}
         >
             {icon ?? style.icon}

@@ -24,10 +24,5 @@ export default async function ChatPageRoot({
         const requestBody = await chatHistoryRequest.json();
         chatHistory = requestBody.data.history;
     }
-
-    return (
-        <div className="flex flex-col">
-            <ChatPage botDetails={botDetails} chatHistory={chatHistory} />
-        </div>
-    );
+    return <ChatPage bot_details={botDetails} chat_history={chatHistory} />;
 }
