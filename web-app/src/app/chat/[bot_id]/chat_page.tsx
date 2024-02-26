@@ -131,7 +131,7 @@ export default function ChatPage({
                         </div>
                     </div>
                 </nav>
-                <div className="w-full h-full flex flex-col px-96 pb-5">
+                <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5">
                     <div
                         className="flex-auto  flex flex-col justify-between mb-4"
                         id="messages"
@@ -151,7 +151,7 @@ export default function ChatPage({
                     </div>
                 </div>
             </div>
-            <div className="px-96 pb-20">
+            <div className="px-96 lg:px-56 pb-20">
                 <ChatInput
                     isInputEnabled={enableInput}
                     onSubmit={(question) => getAnswer(question)}
