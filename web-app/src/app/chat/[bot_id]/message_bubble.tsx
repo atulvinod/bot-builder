@@ -1,20 +1,25 @@
 import Image from "next/image";
 import magicIcon from "../../../svgs/sparkling.svg";
+import "animate.css";
 
 export default function ChatBubble({
     role: type,
     isMagic = false,
     children,
+    onClick = () => {},
+    animate = false,
 }: {
     role: "user" | "assistant";
     isMagic?: boolean;
     children: React.ReactElement;
+    onClick?: () => void;
+    animate?: boolean;
 }) {
     function getStyle() {
-        let base = "rounded-3xl mt-5 px-5 py-3 w-fit";
+        let base = "rounded-3xl  px-5 py-3 w-fit";
         let rounding = type == "user" ? "rounded-br-none " : "rounded-bl-none";
         let bgColor = isMagic
-            ? "bg-appLightBlue"
+            ? "bg-appLightBlue cursor-pointer"
             : type == "user"
             ? "bg-appParrot"
             : "bg-appTeal";
@@ -23,11 +28,19 @@ export default function ChatBubble({
     }
     return (
         <div
-            className={`flex flex-row items-center ${
-                type == "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex flex-row items-center mt-5 ${
+                animate ? "animate__animated animate__fadeInUp" : ""
+            } ${type == "user" ? "justify-end" : "justify-start"}`}
         >
-            <div className="max-w-[55%]">
+            <div
+                onClick={onClick}
+                className={
+                    `max-w-[55%] flex flex-row items-center` +
+                    (isMagic
+                        ? "transition-transform duration-300 transform hover:translate-y-[-5px]"
+                        : "")
+                }
+            >
                 {isMagic && (
                     <Image
                         src={magicIcon}

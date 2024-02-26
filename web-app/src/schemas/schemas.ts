@@ -31,3 +31,11 @@ export const botDetails = pgTable("bot_details", {
     spec: json("spec"),
     is_deleted: boolean("is_deleted").default(false),
 });
+
+export const chatSessions = pgTable("chat_sessions", {
+    id: serial("id").primaryKey(),
+    created_at: date("created_at", { mode: "date" }).defaultNow().notNull(),
+    user_id: integer("user_id").notNull(),
+    session_id: text("session_id").notNull(),
+    bot_id: integer("bot_id").notNull(),
+});

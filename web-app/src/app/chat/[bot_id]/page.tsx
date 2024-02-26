@@ -1,8 +1,10 @@
 import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";
-import { ChatMessage } from "@/app/shared/utils";
+import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
 import ChatPage from "./chat_page";
+
+const CHAT_SERVICE_HOST = getChatServiceHost();
 
 export default async function ChatPageRoot({
     params,
@@ -14,15 +16,56 @@ export default async function ChatPageRoot({
         .from(schema.botDetails)
         .where(eq(schema.botDetails.id, params.bot_id));
 
-    const chatHistoryRequest = await fetch(
-        `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}/bot/${params.bot_id}/history`,
-        { cache: "no-store" }
+    let chatHistory: ChatMessage[] = [];
+    let userSessionId: string | null = null;
+    let suggestedQuestions: string[] = [];
+
+    // TODO: Pass in user token
+    const userSessionRequest = await fetch(
+        `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/session`
     );
 
-    let chatHistory: ChatMessage[] = [];
-    if (chatHistoryRequest.ok) {
-        const requestBody = await chatHistoryRequest.json();
-        chatHistory = requestBody.data.history;
+    if (userSessionRequest.ok) {
+        userSessionId = (await userSessionRequest.json()).data.session;
+        const chatHistoryRequest = await fetch(
+            `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/history`,
+            {
+                cache: "no-store",
+                headers: {
+                    "Chat-Session-Id": userSessionId!!,
+                },
+            }
+        );
+
+        if (chatHistoryRequest.ok) {
+            const requestBody = await chatHistoryRequest.json();
+            chatHistory = requestBody.data.history;
+
+            if (chatHistory.length == 0) {
+                const suggestedQuestionsRequest = await fetch(
+                    `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/suggested_questions`,
+                    {
+                        cache: "no-store",
+                    }
+                );
+                const suggestedQuestionsBody = (
+                    await suggestedQuestionsRequest.json()
+                ).data.questions;
+                suggestedQuestions = suggestedQuestionsBody;
+            }
+        } else {
+            throw new Error("Unexpected error occurred, Please try again");
+        }
+    } else {
+        throw new Error("Unexpected error, Please try again");
     }
-    return <ChatPage bot_details={botDetails} chat_history={chatHistory} />;
+
+    return (
+        <ChatPage
+            bot_details={botDetails}
+            chat_history={chatHistory}
+            session_id={userSessionId!!}
+            suggested_questions={suggestedQuestions}
+        />
+    );
 }

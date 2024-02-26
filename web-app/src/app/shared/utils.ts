@@ -60,3 +60,7 @@ export interface ChatMessage {
     role: "user" | "assistant";
     content: string;
 }
+
+export function getChatServiceHost(){
+    return `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}`
+}

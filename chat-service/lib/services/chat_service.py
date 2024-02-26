@@ -13,6 +13,7 @@ from ..utils.redis_client import RedisClient
 from ..utils.db_client import DB
 from ..utils.util import convertChatMessagesToJSON
 import json
+import uuid
 
 db = DB().getClient()
 pinecone = PineconeClient().getClient()
@@ -20,7 +21,7 @@ redis = RedisClient().getClient()
 
 
 def getBotSpec(bot_id: int):
-    cacheKey = f"bot-spec;{bot_id}"
+    cacheKey = f"bot-spec:{bot_id}"
     cacheHit = redis.get(cacheKey)
 
     if cacheHit is None:
@@ -37,13 +38,13 @@ def getBotSpec(bot_id: int):
     return data
 
 
-def getHistoryCacheKey(bot_id: int):
-    cacheKey = f"chat-history:{bot_id}"
+def getHistoryCacheKey(bot_id: int, user_session_key:str):
+    cacheKey = f"chat-history:{bot_id}-{user_session_key}"
     return cacheKey
 
 
-def retrieveChatHistory(bot_id: int):
-    cacheKey = getHistoryCacheKey(bot_id)
+def retrieveChatHistory(bot_id: int, user_session_key:str = "system"):
+    cacheKey = getHistoryCacheKey(bot_id, user_session_key)
     history = json.loads(redis.get(cacheKey) or "[]")
 
     def convertToChatMessage(x):
@@ -55,15 +56,14 @@ def retrieveChatHistory(bot_id: int):
 
 
 def updateChatHistory(
-    bot_id: int, chat_history: List[ChatMessage], new_messages: List[ChatMessage]
+    bot_id: int, user_session_key:str,chat_history: List[ChatMessage], new_messages: List[ChatMessage]
 ):
-    cacheKey = getHistoryCacheKey(bot_id)
+    cacheKey = getHistoryCacheKey(bot_id, user_session_key)
     merged_history = chat_history + new_messages
     historyJson = convertChatMessagesToJSON(merged_history)
     redis.set(cacheKey, historyJson)
 
-
-def getResponseForQuery(bot_id: int, user_question: str):
+def getAgent(bot_id:int, user_session_key:str="system"):
     spec = getBotSpec(bot_id)
     queryEngineTools = []
     # TODO: re-write the code to make it more generic
@@ -80,13 +80,17 @@ def getResponseForQuery(bot_id: int, user_question: str):
                 ),
             )
             queryEngineTools.append(queryEngineTool)
-    chat_history = retrieveChatHistory(bot_id)
+    chat_history = retrieveChatHistory(bot_id, user_session_key)
     agent = OpenAIAgent.from_tools(
         tools=queryEngineTools,
         chat_history=chat_history,
         system_prompt="You are an assistant helping user answer queries based on the given data",
     )
+    return (agent,chat_history)
 
+
+def getResponseStreamForQuery(bot_id: int, user_session_key, user_question: str):
+    (agent, chat_history) = getAgent(bot_id, user_session_key)    
     responseText = ""
     
     for x in agent.stream_chat(user_question).response_gen:
@@ -101,3 +105,41 @@ def getResponseForQuery(bot_id: int, user_question: str):
             ChatMessage(role=MessageRole.ASSISTANT, content=responseText),
         ],
     )
+
+def getResponseTextForQuery(bot_id, user_session_key, user_question: str):
+    (agent, chat_history) = getAgent(bot_id, user_session_key)
+    response = agent.chat(user_question).response
+    updateChatHistory(
+        bot_id,
+        chat_history,
+         [
+            ChatMessage(role=MessageRole.USER, content=user_question),
+            ChatMessage(role=MessageRole.ASSISTANT, content=response),
+        ],
+    )
+
+def getSuggestedQuestions(bot_id):
+    try:
+        cache_key = f"suggested:{bot_id}"
+        cache_hit = redis.get(cache_key)
+
+        if cache_hit is not None:
+            questions = json.loads(cache_hit)
+            return questions['questions']
+        
+        (agent, _) = getAgent(bot_id)
+        agentResponse:str = agent.chat("Specify 3 questions that I can ask you based on the context given. Reply only with questions, don't respond with bullet points, instead respond in such a way where each question is separated with a ' | ' separator").response
+        questions = agentResponse.split(' | ')
+        redis.set(cache_key, json.dumps({"questions":questions}))
+        return questions
+    except:
+        return []
+
+def getChatSession(bot_id, user_id):
+    session = db.one("SELECT session_id FROM chat_sessions WHERE bot_id = %(bot_id)s and user_id = %(user_id)s ORDER BY id LIMIT 1",{"bot_id":bot_id, "user_id":user_id})
+    if session is None:
+        uid = uuid.uuid4().__str__()
+        db.run("INSERT INTO chat_sessions(bot_id, session_id ,user_id) VALUES (%(bot_id)s,%(session_id)s,%(user_id)s)",{"bot_id":bot_id, "session_id":uid, "user_id":user_id})
+        return uid
+    
+    return session
