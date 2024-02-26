@@ -1,10 +1,5 @@
 "use client";
 
-import AvatarImage from "@/app/shared/components/avatar_image";
-import { Button, ButtonVariants } from "@/app/shared/components/buttons";
-import infoIcon from "../../../svgs/info.svg";
-import moreIcon from "../../../svgs/more.svg";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { animateScroll } from "react-scroll";
 import ChatBubble from "./message_bubble";
@@ -12,6 +7,8 @@ import { toast } from "sonner";
 import { ChatInput } from "./chat_input";
 import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
 import * as schemas from "../../../schemas/schemas";
+
+import { ChatPageNav } from "./chat_page_navbar";
 
 const CHAT_SERVICE_HOST = getChatServiceHost();
 
@@ -111,47 +108,7 @@ export default function ChatPage({
     return (
         <div className="flex flex-col h-[100vh]">
             <div className="overflow-y-scroll mb-5 flex-auto" id="messages">
-                <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5 fixed bg-white">
-                    <div className="flex flex-row items-center">
-                        <AvatarImage />
-                        <span className="ml-2 text-xl">{bot_details.name}</span>
-                    </div>
-                    <div className="flex flex-row items-center">
-                        <div>
-                            <Button
-                                buttonText={"Clear Chat"}
-                                variant={ButtonVariants.Muted}
-                            />
-                        </div>
-
-                        <div className="ml-2">
-                            <Button
-                                variant={ButtonVariants.Muted}
-                                icon={
-                                    <Image
-                                        alt="info-icon"
-                                        src={infoIcon}
-                                        width={20}
-                                        height={20}
-                                    />
-                                }
-                            />
-                        </div>
-                        <div className="ml-2">
-                            <Button
-                                variant={ButtonVariants.Muted}
-                                icon={
-                                    <Image
-                                        alt="more-icon"
-                                        src={moreIcon}
-                                        width={20}
-                                        height={20}
-                                    />
-                                }
-                            />
-                        </div>
-                    </div>
-                </nav>
+                <ChatPageNav bot_details={bot_details} />
                 <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
                     <div
                         className="flex-auto  flex flex-col mb-4"

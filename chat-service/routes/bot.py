@@ -17,7 +17,7 @@ def  chat(bot_id:int):
     acceptType = request.headers.get('Accept')
 
     if userSession is None or acceptType is None:
-        return Response({"message":"Invalid user session header or accept header type"},status=400)
+        return Response({"message":"Invalid user session header or accept header type"},status=400, content_type="application/json")
     
     if acceptType is None or acceptType != 'text/event-stream':
         return Response(getResponseTextForQuery(bot_id, userSession))
@@ -36,7 +36,7 @@ def getHistory(bot_id:int):
     userSession = request.headers.get(USER_SESSION_HEADER_KEY)
     
     if userSession is None:
-        return Response("invalid user session",status=400)
+        return Response({"message":"invalid user session"},status=400,content_type="application/json")
     
     history = retrieveChatHistory(bot_id, userSession)
     response = list(map(lambda x:x.dict(), history))
