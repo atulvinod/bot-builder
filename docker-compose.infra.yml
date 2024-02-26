@@ -14,10 +14,5 @@ services:
     image: redis
     ports:
       - '6379:6379'
-  embedding-service:
-    build:
-      context: ./botbuilder-embed-service
-    ports:
-      - 8000:8000
 volumes:
   postgres-data:
