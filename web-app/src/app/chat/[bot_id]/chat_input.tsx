@@ -38,7 +38,12 @@ export function ChatInput({
                     "min-h-16 bg-appGrey rounded-lg py-2 flex-auto h-full px-5 flex flex-row items-center"
                 }
             >
-                {!isInputEnabled && <PulseLoader color="rgb(168 175 184)" />}
+                {!isInputEnabled && (
+                    <PulseLoader
+                        color="rgb(168 175 184)"
+                        className="animate__animated animate__fadeInRight"
+                    />
+                )}
                 {isInputEnabled && (
                     <textarea
                         ref={textAreaRef}
@@ -50,7 +55,7 @@ export function ChatInput({
                         }}
                         disabled={!isInputEnabled}
                         value={inputValue}
-                        className="w-full bg-transparent outline-none resize-none"
+                        className="w-full bg-transparent outline-none resize-none animate__animated animate__fadeInDown"
                         placeholder="Ask a question?"
                         onChange={(event) => {
                             const textarea = event.target;
@@ -65,7 +70,7 @@ export function ChatInput({
                     />
                 )}
             </div>
-            <div className="ml-3 flex flex-col justify-center">
+            <div className="ml-3 flex flex-col justify-center animate__animated animate__fadeIn">
                 {isInputEnabled && (
                     <Button
                         size={ButtonSize.Large}
