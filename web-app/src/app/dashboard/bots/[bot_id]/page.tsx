@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, ButtonVariants } from "@/app/shared/buttons";
-import HeadingWithSideActionButton from "@/app/shared/heading_with_side_action_button";
+import { Button, ButtonVariants } from "@/app/shared/components/buttons";
+import HeadingWithSideActionButton from "@/app/shared/components/heading_with_side_action_button";
 import {
     Form,
     FormControl,

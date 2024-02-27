@@ -8,6 +8,9 @@ const nextConfig = {
                 hostname: "api.dicebear.com",
                 port: "",
                 pathname: "/7.x/**"
+            }, {
+                protocol: "https",
+                hostname: "*.googleusercontent.com"
             }
         ]
     }

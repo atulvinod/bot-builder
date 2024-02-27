@@ -17,11 +17,13 @@ export default function ChatPage({
     chat_history,
     session_id,
     suggested_questions,
+    auth_token,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
     chat_history: (ChatMessage & { animate?: boolean })[];
     session_id: string;
     suggested_questions: string[];
+    auth_token: string;
 }) {
     const [history, setChatHistory] = useState(chat_history);
     const [enableInput, setInputEnabled] = useState(true);
@@ -60,6 +62,7 @@ export default function ChatPage({
                     "Content-Type": "application/json",
                     Accept: "text/event-stream",
                     "Chat-Session-Id": session_id,
+                    Authorization: auth_token,
                 },
                 body: JSON.stringify({
                     question,

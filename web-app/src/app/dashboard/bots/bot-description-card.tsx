@@ -1,8 +1,10 @@
+"use client";
 import AvatarImage from "@/app/shared/components/avatar_image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import openExternalSvg from "../../../svgs/open-external.svg";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type botStatus = "queued" | "inprogress" | "created" | "failed";
 
@@ -14,14 +16,19 @@ export default function BotDescription({
     status,
 }: {
     bot_id: number;
-    avatar_image: string;
+    avatar_image?: string;
     bot_name: string;
     bot_description: string;
     status: botStatus;
 }) {
+    const router = useRouter();
+    const botLink = `/dashboard/bots/${bot_id}`;
     return (
-        <Link href={`/dashboard/bots/${bot_id}`}>
-            <div className="rounded-lg bg-appGrey p-5  cursor-pointer">
+        <div
+            className="rounded-lg bg-appGrey p-5  cursor-pointer"
+            onClick={() => router.push(botLink)}
+        >
+            <div>
                 <div className="flex flex-row items-center">
                     <AvatarImage path={avatar_image}></AvatarImage>
                     <span className="text-lg ml-3 break-all">{bot_name}</span>
@@ -59,6 +66,6 @@ export default function BotDescription({
                     )}
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

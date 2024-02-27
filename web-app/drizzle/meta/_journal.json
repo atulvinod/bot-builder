@@ -15,6 +15,20 @@
       "when": 1708926042684,
       "tag": "0001_handy_sharon_carter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709008703251,
+      "tag": "0002_curvy_the_santerians",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1709015812058,
+      "tag": "0003_sharp_black_tom",
+      "breakpoints": true
     }
   ]
 }

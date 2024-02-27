@@ -3,6 +3,7 @@ import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";
 import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
 import ChatPage from "./chat_page";
+import { getServerSession } from "next-auth";
 
 const CHAT_SERVICE_HOST = getChatServiceHost();
 
@@ -19,10 +20,15 @@ export default async function ChatPageRoot({
     let chatHistory: ChatMessage[] = [];
     let userSessionId: string | null = null;
     let suggestedQuestions: string[] = [];
-
-    // TODO: Pass in user token
+    const session = await getServerSession();
+    const authToken = `Bearer ${session?.user?.jwt}`;
     const userSessionRequest = await fetch(
-        `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/session`
+        `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/session`,
+        {
+            headers: {
+                Authorization: authToken,
+            },
+        }
     );
 
     if (userSessionRequest.ok) {
@@ -33,6 +39,7 @@ export default async function ChatPageRoot({
                 cache: "no-store",
                 headers: {
                     "Chat-Session-Id": userSessionId!!,
+                    Authorization: authToken,
                 },
             }
         );
@@ -46,6 +53,9 @@ export default async function ChatPageRoot({
                     `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/suggested_questions`,
                     {
                         cache: "no-store",
+                        headers: {
+                            Authorization: authToken,
+                        },
                     }
                 );
                 const suggestedQuestionsBody = (
@@ -66,6 +76,7 @@ export default async function ChatPageRoot({
             chat_history={chatHistory}
             session_id={userSessionId!!}
             suggested_questions={suggestedQuestions}
+            auth_token={authToken}
         />
     );
 }

@@ -5,8 +5,10 @@ import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 
 export default async function ViewBotsPage() {
+
     const bots = await db_client
         .select()
         .from(schema.botDetails)
@@ -26,7 +28,6 @@ export default async function ViewBotsPage() {
                 {bots.map((m, i) => (
                     <BotDescription
                         key={i}
-                        avatar_image="https://api.dicebear.com/7.x/pixel-art/svg"
                         bot_description={m.description}
                         bot_name={m.name}
                         bot_id={m.id}
