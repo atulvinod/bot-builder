@@ -61,13 +61,13 @@ class BotTrainer:
         logging.info("Building vector index from training files")
         VectorStoreIndex.from_documents(documents=training_files,storage_context=pinecone_storage_context)   
 
-    def __processTrainingData(self, bot_id:int ,bot_data_id: str ,training_spec: List[str]):
-        training_asset_directory = self.storage.createTrainingAssetDirectory(bot_data_id)
+    def __processTrainingData(self, bot_id:int ,assets_id: str ,training_spec: List[str]):
+        training_asset_directory = self.storage.createTrainingAssetDirectory(assets_id)
         
         for ts in training_spec:
             if (ts == TrainingAssetTypes.Files.value):
                 logging.info("Building vectors using training files")
-                self.__buildVectorsUsingFiles(training_asset_directory, bot_id,bot_data_id)
+                self.__buildVectorsUsingFiles(training_asset_directory, bot_id,assets_id)
                 logging.info("Vectors built using training files")
         
         shutil.rmtree(training_asset_directory)
@@ -78,8 +78,8 @@ class BotTrainer:
             bot_details = self.db.getBotDetailsById(bot_id)
             bot_spec = json.loads(bot_details.spec)
             training_spec = bot_spec['training_spec']
-            data_id = bot_spec['data_id']
-            self.__processTrainingData(bot_id, data_id ,training_spec)
+            assets_id = bot_details.assets_id
+            self.__processTrainingData(bot_id, assets_id ,training_spec)
             self.updateBotStatus(bot_id, BotStatus.Created)
             logging.info("Created bot "+str(bot_id))
         except Exception as e:

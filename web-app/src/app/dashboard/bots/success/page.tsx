@@ -1,7 +1,7 @@
 import { db_client } from "@/lib/db";
 import * as schemas from "../../../../schemas/schemas";
 import { and, eq } from "drizzle-orm";
-import { Button } from "@/app/shared/buttons";
+import { Button } from "@/app/shared/components/buttons";
 import Link from "next/link";
 
 export default async function BotSuccessPage({

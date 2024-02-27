@@ -18,6 +18,7 @@ export const statusEnum = pgEnum("status", [
     "inprogress",
     "created",
     "failed",
+    "failed_queue_push",
 ]);
 
 export const botDetails = pgTable("bot_details", {
@@ -34,6 +35,7 @@ export const botDetails = pgTable("bot_details", {
     spec: json("spec"),
     is_deleted: boolean("is_deleted").default(false),
     avatar_image: text("avatar_image"),
+    assets_id: text("assets_id"),
 });
 
 export const chatSessions = pgTable("chat_sessions", {

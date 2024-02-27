@@ -16,7 +16,7 @@ class Storage:
         return temp_directory
 
     def downloadTrainingAsset(self, data_id:str, training_directory:str,asset_type: TrainingAssetDefinitions):
-        blob = self.root_bucket.blob('{data_id}/{asset_type}'.format(data_id=data_id, asset_type=asset_type))
+        blob = self.root_bucket.blob('training/{data_id}/{asset_type}'.format(data_id=data_id, asset_type=asset_type))
         # download asset 
         contents = blob.download_as_bytes()
 

@@ -1,0 +1,1 @@
+ALTER TABLE "bot_details" ADD COLUMN "assets_id" text;

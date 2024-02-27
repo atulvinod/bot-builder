@@ -32,6 +32,7 @@ export default async function ViewBotsPage() {
                         bot_name={m.name}
                         bot_id={m.id}
                         status={m.status ?? "queued"}
+                        avatar_image={m.avatar_image}
                     />
                 ))}
             </div>

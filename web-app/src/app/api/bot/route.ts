@@ -22,17 +22,28 @@ export async function POST(request: NextRequest) {
     const botName = formData.get(constants.BOT_NAME);
     const botDescription = formData.get(constants.BOT_DESCRIPTION);
     const trainingDataMap = createTrainingDataMap(formData);
+    const avatarFile = formData.get(constants.BOT_AVATAR);
     if (botName && botDescription) {
-        const bot_id = await botServices.createBot(
+        const botId = await botServices.createBot(
             1,
             botName.toString(),
             botDescription.toString(),
-            trainingDataMap
+            trainingDataMap,
+            avatarFile as File
         );
-        return NextResponse.json(
-            { message: "Created", data: { bot_id } },
-            { status: StatusCodes.CREATED }
-        );
+        if (botId) {
+            return NextResponse.json(
+                { message: "Created", data: { bot_id: botId } },
+                { status: StatusCodes.CREATED }
+            );
+        } else {
+            return NextResponse.json(
+                {
+                    message: "Unexpected error occurred",
+                },
+                { status: StatusCodes.INTERNAL_SERVER_ERROR }
+            );
+        }
     }
     return NextResponse.json(
         { error: "Missing required fields" },

@@ -5,72 +5,130 @@ import { v4 as uuidv4 } from "uuid";
 import * as storage from "../storage";
 import * as ai from "../openai";
 import getRedisClient from "../redis";
-import { eq } from "drizzle-orm";
+import { ExtractTablesWithRelations, eq } from "drizzle-orm";
 import { AppError } from "@/app/shared/app_error";
 import { StatusCodes } from "http-status-codes";
+import {
+    StorageReference,
+    UploadResult,
+    getDownloadURL,
+} from "firebase/storage";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
 
 async function generateBotSpec(
+    assets_id: string,
     training_data: { [key: string]: Object },
     bot_description: string
-) {
-    const uid = uuidv4();
+): Promise<[{ [key: string]: any }, StorageReference[]]> {
     const spec: { [key: string]: any } = {
-        data_id: uid,
         training_spec: [...Object.keys(training_data)],
         system_prompt: "",
     };
 
+    const uploadRefs = [];
     if (constants.TrainingAssetTypes.Files in training_data) {
-        await storage.uploadFiles(
-            uid,
+        let fileZipUploadRef = await storage.uploadZipped(
+            `training/${assets_id}`,
             "files",
             training_data[constants.TrainingAssetTypes.Files] as File[]
         );
+        uploadRefs.push(fileZipUploadRef.ref);
     }
     // TODO: uncomment
     // const system_prompt = await ai.generateBotSystemPrompt(bot_description);
     spec["system_prompt"] = "systemPrompt";
-    return spec;
+    return [spec, uploadRefs];
 }
 
 async function createBotDetails(
+    transaction: PgTransaction<
+        PostgresJsQueryResultHKT,
+        Record<string, never>,
+        ExtractTablesWithRelations<Record<string, never>>
+    >,
     name: string,
     description: string,
     created_by_user_id: number,
-    spec: Object
-) {
+    spec: Object,
+    assets_id: string,
+    avatar?: File
+): Promise<[number, StorageReference[]]> {
+    let avatar_image = null;
+    let uploadRefs = [];
+    if (avatar) {
+        const uploadResult = await storage.uploadFile(
+            `avatar/${assets_id}`,
+            "avatar.png",
+            avatar
+        );
+        avatar_image = await getDownloadURL(uploadResult.ref);
+        uploadRefs.push(uploadResult.ref);
+    }
     const value: typeof schemas.botDetails.$inferInsert = {
         name,
         description,
         created_by_user_id,
         spec,
+        assets_id,
+        avatar_image,
     };
-    const [inserted_value] = await db_client
+    const [inserted_value] = await transaction
         .insert(schemas.botDetails)
         .values(value)
         .returning();
-    return inserted_value.id;
+    return [inserted_value.id, uploadRefs];
 }
 
-async function pushToTaskQueue(bot_id: number, data_id: string) {
-    const redis_client = await getRedisClient();
-    await redis_client.lPush("task", JSON.stringify({ bot_id, data_id }));
+async function pushToTaskQueue(bot_id: number) {
+    try {
+        const redis_client = await getRedisClient();
+        await redis_client.lPush("task", JSON.stringify({ bot_id }));
+    } catch (e) {
+        await db_client
+            .update(schemas.botDetails)
+            .set({ status: "failed_queue_push" })
+            .where(eq(schemas.botDetails.id, bot_id));
+    }
 }
 
 export async function createBot(
     user_id: number,
     bot_name: string,
     bot_description: string,
-    training_data: { [key: string]: Object }
+    training_data: { [key: string]: Object },
+    avatar?: File
 ) {
-    const spec = await generateBotSpec(training_data, bot_description);
-    const botId = await createBotDetails(
-        bot_name,
-        bot_description,
-        user_id,
-        spec
-    );
-    await pushToTaskQueue(botId, spec.bot_id);
+    const assets_id = uuidv4();
+    let botDataUploadRefs: StorageReference[] = [];
+    const botId: number | null = await db_client.transaction(async (tx) => {
+        try {
+            const [spec, specUploadRefs] = await generateBotSpec(
+                assets_id,
+                training_data,
+                bot_description
+            );
+            botDataUploadRefs.push(...specUploadRefs);
+            const [botId, detailUploadRefs] = await createBotDetails(
+                tx,
+                bot_name,
+                bot_description,
+                user_id,
+                spec,
+                assets_id,
+                avatar
+            );
+            botDataUploadRefs.push(...detailUploadRefs);
+            return botId;
+        } catch (e) {
+            tx.rollback();
+            await storage.deleteRefs(botDataUploadRefs);
+            return null;
+        }
+    });
+    if (botId) {
+        await pushToTaskQueue(botId);
+    }
     return botId;
 }
 
@@ -79,9 +137,9 @@ export async function getBotDetails(bot_id: number) {
         .select()
         .from(schemas.botDetails)
         .where(eq(schemas.botDetails.id, bot_id));
-    if (!details){
-        throw new AppError(StatusCodes.NOT_FOUND, "Bot details not found")
+    if (!details) {
+        throw new AppError(StatusCodes.NOT_FOUND, "Bot details not found");
     }
 
-    return details
+    return details;
 }

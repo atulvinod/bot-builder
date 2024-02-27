@@ -29,6 +29,20 @@
       "when": 1709015812058,
       "tag": "0003_sharp_black_tom",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1709021219071,
+      "tag": "0004_lazy_jackpot",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1709023589564,
+      "tag": "0005_magenta_spiral",
+      "breakpoints": true
     }
   ]
 }

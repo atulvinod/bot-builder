@@ -6,7 +6,7 @@ import openExternalSvg from "../../../svgs/open-external.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-type botStatus = "queued" | "inprogress" | "created" | "failed";
+type botStatus = "queued" | "inprogress" | "created" | "failed" |"failed_queue_push";
 
 export default function BotDescription({
     avatar_image,
@@ -16,7 +16,7 @@ export default function BotDescription({
     status,
 }: {
     bot_id: number;
-    avatar_image?: string;
+    avatar_image?: string | null;
     bot_name: string;
     bot_description: string;
     status: botStatus;

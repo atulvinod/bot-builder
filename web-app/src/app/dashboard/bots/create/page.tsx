@@ -28,6 +28,7 @@ import { TrainingFilesInputConfig } from "@/app/shared/utils";
 import * as constants from "@/lib/constants";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ImageInput } from "@/app/shared/components/image-input/image-input";
 
 const formSchema = z.object({
     botname: z
@@ -57,6 +58,7 @@ export default function CreateBotPage({
     const [trainingDataErrors, setTrainingDataErrors] = useState<string[]>();
     const [isRequestProcessing, setIsRequestProcessing] =
         useState<boolean>(false);
+    const [avatarImage, setAvatarImage] = useState<File>();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -110,6 +112,9 @@ export default function CreateBotPage({
             constants.BOT_DESCRIPTION,
             formData.bot_description
         );
+        if (avatarImage){
+            uploadFormPayload.append(constants.BOT_AVATAR, avatarImage)
+        }
         return uploadFormPayload;
     };
 
@@ -179,30 +184,45 @@ export default function CreateBotPage({
                                 control={form.control}
                                 name="botname"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <div>
                                         <FormLabel className="text-lg">
-                                            Your Bot Name
+                                            Name
                                         </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Add a bot name!"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                        <FormDescription className="border-1 bg-yellow-100 rounded-md p-4">
-                                            This is your public bot name.
-                                        </FormDescription>
-                                    </FormItem>
+                                        <div className="flex flex-row items-start">
+                                            <div>
+                                                <div className="mt-2">
+                                                    <ImageInput
+                                                        handleSetImage={
+                                                            setAvatarImage
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <FormItem className="mt-8 ml-5 flex-auto">
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        placeholder="Add a bot name!"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription className="border-1 bg-yellow-100 rounded-md p-4">
+                                                    Name displayed to the users
+                                                </FormDescription>
+                                            </FormItem>
+                                        </div>
+                                    </div>
                                 )}
                             />
+
                             <FormField
                                 control={form.control}
                                 name="bot_description"
                                 render={({ field }) => (
                                     <FormItem className="mt-10">
                                         <FormLabel className="text-lg">
-                                            Your bot description
+                                            Description
                                         </FormLabel>
                                         <FormControl>
                                             <Textarea
@@ -226,7 +246,7 @@ export default function CreateBotPage({
                             />
                             <div className="mt-10">
                                 <FormLabel className="text-lg">
-                                    Your Training Data
+                                    Training Data
                                 </FormLabel>
                                 <div className="ml-3">
                                     {trainingDataErrors?.map((error, index) => (

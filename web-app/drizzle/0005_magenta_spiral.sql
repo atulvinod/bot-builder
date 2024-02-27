@@ -1,0 +1,1 @@
+ALTER TYPE "status" ADD VALUE 'failed_queue_push';

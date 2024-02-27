@@ -4,6 +4,7 @@ export const BOT_NAME = "BOT_NAME";
 export const BOT_DESCRIPTION = "BOT_DESCRIPTION";
 export const MIN_BOT_NAME_LENGTH = 10;
 export const MAX_BOT_NAME_LENGTH = 50;
+export const BOT_AVATAR = "BOT_AVATAR";
 
 export enum TrainingAssetTypes {
     Files = "Files",
