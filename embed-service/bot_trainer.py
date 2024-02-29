@@ -1,6 +1,6 @@
 from db import DB
 import json
-from typing import List
+from typing import List, Dict
 from constants import TrainingAssetTypes, BotStatus, TrainingAssetDefinitions
 from storage import Storage
 import logging
@@ -22,9 +22,9 @@ class BotTrainer:
     def updateBotStatus(self, bot_id: int, bot_status: BotStatus):
         self.db.getDbClient().run("UPDATE bot_details SET status = %(status)s WHERE id = %(bot_id)s", {"status" : bot_status.value, "bot_id" :bot_id})
 
-    def __getPineconeIndex(self, bot_id:int, asset_type: TrainingAssetTypes):
-        logging.info("Creating Pinecone index")
-        index_key = "id-{bot_id}-type-{asset_type}".format(bot_id=str(bot_id), asset_type=asset_type.value.lower());
+    def __getPineconeIndex(self, bot_id:int, files_id):
+        index_key = f"files-{str(bot_id)}-{files_id.lower()}";
+        logging.info(f"Creating Pinecone index - {index_key}")
         try:
             self.pinecone.create_index(
                 name= index_key,
@@ -49,25 +49,28 @@ class BotTrainer:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(training_directory)   
 
-    def __buildVectorsUsingFiles(self, training_asset_directory:str, bot_id:int ,bot_data_id:str):
+    def __buildVectorsUsingFiles(self,training_config: List[Dict] ,training_asset_directory:str, bot_id:int ,bot_data_id:str):
         training_files_directory = self.__createTrainingFilesDirectory(training_asset_directory)
-        downloaded_asset_path = self.storage.downloadTrainingAsset(bot_data_id, training_asset_directory,TrainingAssetDefinitions.Files.value)
-        self.__extractAssetsZipToTrainingDir(training_files_directory, downloaded_asset_path)
-        pinecone_index = self.__getPineconeIndex(bot_id, TrainingAssetTypes.Files)
-        logging.info("Reading training files")
-        training_files = SimpleDirectoryReader(input_dir=training_files_directory, recursive=True).load_data(show_progress=True)
-        pinecone_vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
-        pinecone_storage_context = StorageContext.from_defaults(vector_store=pinecone_vector_store)
-        logging.info("Building vector index from training files")
-        VectorStoreIndex.from_documents(documents=training_files,storage_context=pinecone_storage_context)   
 
-    def __processTrainingData(self, bot_id:int ,assets_id: str ,training_spec: List[str]):
+        for config in training_config:
+            files_id = config['files_id']
+            downloaded_asset_path = self.storage.downloadTrainingAsset(bot_data_id, training_asset_directory, f"{files_id}.zip")
+            self.__extractAssetsZipToTrainingDir(training_files_directory, downloaded_asset_path)
+            pinecone_index = self.__getPineconeIndex(bot_id, files_id)
+            logging.info("Reading training files")
+            training_files = SimpleDirectoryReader(input_dir=training_files_directory, recursive=True).load_data(show_progress=True)
+            pinecone_vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+            pinecone_storage_context = StorageContext.from_defaults(vector_store=pinecone_vector_store)
+            logging.info("Building vector index from training files")
+            VectorStoreIndex.from_documents(documents=training_files,storage_context=pinecone_storage_context)   
+
+    def __processTrainingData(self, bot_id:int ,assets_id: str ,training_spec: List[Dict]):
         training_asset_directory = self.storage.createTrainingAssetDirectory(assets_id)
         
         for ts in training_spec:
-            if (ts == TrainingAssetTypes.Files.value):
+            if (ts['type'] == TrainingAssetTypes.Files.value):
                 logging.info("Building vectors using training files")
-                self.__buildVectorsUsingFiles(training_asset_directory, bot_id,assets_id)
+                self.__buildVectorsUsingFiles(ts['config'], training_asset_directory, bot_id, assets_id)
                 logging.info("Vectors built using training files")
         
         shutil.rmtree(training_asset_directory)

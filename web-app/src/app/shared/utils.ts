@@ -1,7 +1,13 @@
-import { TrainingDataSchema } from "./components/interfaces";
+import { TrainingDataInputsSchema } from "./components/interfaces";
 import { config } from "dotenv";
 import { TrainingAssetTypes } from "../../lib/constants";
-export class TrainingFilesInputConfig implements TrainingDataSchema<File[]> {
+import {
+    FileTrainingData,
+    FileTrainingDataSchema,
+} from "./components/file_training_data_input_2";
+export class TrainingFilesInputConfig
+    implements TrainingDataInputsSchema<File[]>
+{
     value: File[];
     errors: string[] = [];
     type: TrainingAssetTypes = TrainingAssetTypes.Files;
@@ -34,6 +40,40 @@ export class TrainingFilesInputConfig implements TrainingDataSchema<File[]> {
     }
 }
 
+export class TrainingFilesInputConfigV2
+    implements TrainingDataInputsSchema<FileTrainingData[]>
+{
+    value: FileTrainingData[];
+    type: TrainingAssetTypes = TrainingAssetTypes.Files;
+    errors: string[] = [];
+    constructor() {
+        this.value = [];
+    }
+
+    isValid() {
+        this.errors = [];
+        let totalUploadSize = this.value.reduce((agg, val) => {
+            let size = val.value.files.reduce((agg2, val2) => {
+                return agg2 + bytesToMB(val2.size);
+            }, 0);
+            return agg + size;
+        }, 0);
+
+        const isUnderUploadLimit =
+            totalUploadSize <=
+            Number(process.env.NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB);
+
+        if (!isUnderUploadLimit) {
+            this.errors.push("Files exceed total upload size");
+        }
+        return isUnderUploadLimit;
+    }
+    setValue(o: FileTrainingData[]) {
+        this.value = o;
+        this.isValid();
+    }
+}
+
 export function bytesToMB(bytes: number) {
     return bytes / (1024 * 1024);
 }
@@ -55,12 +95,11 @@ export function loadEnv() {
     });
 }
 
-
 export interface ChatMessage {
     role: "user" | "assistant";
     content: string;
 }
 
-export function getChatServiceHost(){
-    return `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}`
+export function getChatServiceHost() {
+    return `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}`;
 }

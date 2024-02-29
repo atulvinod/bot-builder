@@ -66,20 +66,23 @@ def updateChatHistory(
 def getAgent(bot_id:int, user_session_key:str="system"):
     spec = getBotSpec(bot_id)
     queryEngineTools = []
-    # TODO: re-write the code to make it more generic
-    for trainingTypes in spec["training_spec"]:
-        if trainingTypes == TrainingAssetTypes.Files.value:
-            pineconeIndex = pinecone.Index(f"id-{bot_id}-type-files")
-            vectorStore = PineconeVectorStore(pinecone_index=pineconeIndex)
-            vectorIndex = VectorStoreIndex.from_vector_store(vector_store=vectorStore)
-            queryEngine = vectorIndex.as_query_engine()
-            queryEngineTool = QueryEngineTool(
-                query_engine=queryEngine,
-                metadata=ToolMetadata(
-                    name="resume", description="details about resume"
-                ),
-            )
-            queryEngineTools.append(queryEngineTool)
+
+    for trainingConfig in spec["training_spec"]:
+
+        if trainingConfig['type'] == TrainingAssetTypes.Files.value:
+
+            for fileConfig in trainingConfig['config']:
+                pineconeIndex = pinecone.Index(f"files-{str(bot_id)}-{fileConfig['files_id'].lower()}")
+                vectorStore = PineconeVectorStore(pinecone_index=pineconeIndex)
+                vectorIndex = VectorStoreIndex.from_vector_store(vector_store=vectorStore)
+                queryEngine = vectorIndex.as_query_engine()
+                queryEngineTool = QueryEngineTool(
+                    query_engine=queryEngine,
+                    metadata=ToolMetadata(
+                        name=f"collection of files related to '{fileConfig['context']}'", description=fileConfig['context']
+                    ),
+                )
+                queryEngineTools.append(queryEngineTool)
     chat_history = retrieveChatHistory(bot_id, user_session_key)
     agent = OpenAIAgent.from_tools(
         tools=queryEngineTools,

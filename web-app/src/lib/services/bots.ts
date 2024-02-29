@@ -15,26 +15,60 @@ import {
 } from "firebase/storage";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
+import {
+    TrainingData,
+    TrainingFilesConfig,
+} from "@/app/shared/components/interfaces";
+
+async function handleFilesTrainingData(
+    assets_id: string,
+    form_data: FormData,
+    training_schema: TrainingFilesConfig[]
+) {
+    const uploadRefs: StorageReference[] = [];
+
+    for (let i = 0; i < training_schema.length; i++) {
+        const tds = training_schema[i];
+        const files = form_data.getAll(tds.files_id);
+
+        let fileZipUploadRef = await storage.uploadZipped(
+            `training/${assets_id}`,
+            tds.files_id,
+            files as File[]
+        );
+
+        uploadRefs.push(fileZipUploadRef.ref);
+    }
+    return uploadRefs;
+}
 
 async function generateBotSpec(
     assets_id: string,
-    training_data: { [key: string]: Object },
-    bot_description: string
+    training_data: TrainingData[],
+    bot_description: string,
+    form_data: FormData
 ): Promise<[{ [key: string]: any }, StorageReference[]]> {
     const spec: { [key: string]: any } = {
-        training_spec: [...Object.keys(training_data)],
+        training_spec: training_data,
         system_prompt: "",
     };
 
     const uploadRefs = [];
-    if (constants.TrainingAssetTypes.Files in training_data) {
-        let fileZipUploadRef = await storage.uploadZipped(
-            `training/${assets_id}`,
-            "files",
-            training_data[constants.TrainingAssetTypes.Files] as File[]
-        );
-        uploadRefs.push(fileZipUploadRef.ref);
+    for (let i = 0; i < training_data.length; i++) {
+        const td = training_data[i];
+
+        switch (td.type) {
+            case constants.TrainingAssetTypes.Files:
+                const refs = await handleFilesTrainingData(
+                    assets_id,
+                    form_data,
+                    td.config as TrainingFilesConfig[]
+                );
+                uploadRefs.push(...refs);
+                break;
+        }
     }
+
     // TODO: uncomment
     // const system_prompt = await ai.generateBotSystemPrompt(bot_description);
     spec["system_prompt"] = "systemPrompt";
@@ -96,7 +130,8 @@ export async function createBot(
     user_id: number,
     bot_name: string,
     bot_description: string,
-    training_data: { [key: string]: Object },
+    training_data: TrainingData[],
+    form_data: FormData,
     avatar?: File
 ) {
     const assets_id = uuidv4();
@@ -106,7 +141,8 @@ export async function createBot(
             const [spec, specUploadRefs] = await generateBotSpec(
                 assets_id,
                 training_data,
-                bot_description
+                bot_description,
+                form_data
             );
             botDataUploadRefs.push(...specUploadRefs);
             const [botId, detailUploadRefs] = await createBotDetails(

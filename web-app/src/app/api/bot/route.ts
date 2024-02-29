@@ -5,31 +5,23 @@ import { StatusCodes } from "http-status-codes";
 import { NextApiRequest } from "next";
 import { botDetails } from "@/schemas/schemas";
 
-const createTrainingDataMap = (formData: FormData) => {
-    const obj: { [key: string]: any } = {};
-    const trainingDataTypes = JSON.parse(
-        formData.get(constants.TRAINING_DATA_TYPES)?.toString() ?? "[]"
-    );
-    (trainingDataTypes as []).forEach((t) => {
-        obj[t] = formData.getAll(constants.inputTypeToFormKeyMap[t]);
-    });
-    return obj;
-};
-
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     const botName = formData.get(constants.BOT_NAME);
     const botDescription = formData.get(constants.BOT_DESCRIPTION);
-    const trainingDataMap = createTrainingDataMap(formData);
+    const trainingData = JSON.parse(
+        String(formData.get(constants.TRAINING_SPEC)) ?? "[]"
+    );
     const avatarFile = formData.get(constants.BOT_AVATAR);
     if (botName && botDescription) {
         const botId = await botServices.createBot(
             1,
             botName.toString(),
             botDescription.toString(),
-            trainingDataMap,
-            avatarFile as File
+            trainingData,
+            formData,
+            avatarFile as File,
         );
         if (botId) {
             return NextResponse.json(

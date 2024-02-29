@@ -23,12 +23,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FileTrainingDataInput from "@/app/shared/components/file_training_data_input";
 import { useRef, useState } from "react";
-import { TrainingDataSchema } from "@/app/shared/components/interfaces";
-import { TrainingFilesInputConfig } from "@/app/shared/utils";
+import {
+    TrainingData,
+    TrainingDataInputsSchema,
+    TrainingFilesConfig,
+} from "@/app/shared/components/interfaces";
+import {
+    TrainingFilesInputConfig,
+    TrainingFilesInputConfigV2,
+} from "@/app/shared/utils";
 import * as constants from "@/lib/constants";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ImageInput } from "@/app/shared/components/image-input/image-input";
+import TrainingFilesInputV2, {
+    FileTrainingData,
+} from "@/app/shared/components/file_training_data_input_2";
 
 const formSchema = z.object({
     botname: z
@@ -49,11 +59,7 @@ const formSchema = z.object({
         ),
 });
 
-export default function CreateBotPage({
-    params,
-}: {
-    params: { bot_id: string };
-}) {
+export default function CreateBotPage() {
     const router = useRouter();
     const [trainingDataErrors, setTrainingDataErrors] = useState<string[]>();
     const [isRequestProcessing, setIsRequestProcessing] =
@@ -66,42 +72,36 @@ export default function CreateBotPage({
 
     type FormDataStruct = z.infer<typeof formSchema>;
 
-    const [trainingDataInputState, setTrainingDataInputStates] = useState<
-        TrainingDataSchema<File[]>[]
-    >([new TrainingFilesInputConfig()]);
-
-    const getTrainingData = (): {
-        [key: string]: any;
-    } => {
-        const data = trainingDataInputState.reduce(
-            (acc: { [key: string]: Object }, v) => {
-                const inputType = constants.TrainingAssetTypes[v.type];
-                acc[inputType] = v.value;
-                return acc;
-            },
-            {}
-        );
-        return data;
-    };
+    const [trainingDataInputs, setTrainingDataInputs] = useState<
+        TrainingFilesInputConfigV2[]
+    >([new TrainingFilesInputConfigV2()]);
 
     const appendTrainingDataToForm = (formData: FormData) => {
-        const trainingData = getTrainingData();
-        const trainingDataTypes: constants.TrainingAssetTypes[] = [];
-        if (
-            trainingData[constants.TrainingAssetTypes.Files] &&
-            trainingData[constants.TrainingAssetTypes.Files].length
-        ) {
-            trainingDataTypes.push(constants.TrainingAssetTypes.Files);
-            trainingData[constants.TrainingAssetTypes.Files].forEach(
-                (f: File) => {
-                    formData.append(constants.TRAINING_DATA_FILE, f);
-                }
-            );
-        }
-        formData.set(
-            constants.TRAINING_DATA_TYPES,
-            JSON.stringify(trainingDataTypes)
-        );
+        const trainingSpec: TrainingData[] = [];
+
+        trainingDataInputs.forEach((data) => {
+            if (data.type == constants.TrainingAssetTypes.Files) {
+                const fileTrainingSpec: TrainingFilesConfig[] = [];
+
+                (data.value as FileTrainingData[]).forEach((data, idx) => {
+                    const filesId = `file-${idx}`;
+                    const spec = {
+                        context: data.value.context,
+                        files_id: filesId,
+                    };
+                    for (let i = 0; i < data.value.files.length; i++) {
+                        formData.append(filesId, data.value.files[i]);
+                    }
+                    fileTrainingSpec.push(spec);
+                });
+
+                trainingSpec.push({
+                    type: constants.TrainingAssetTypes.Files,
+                    config: fileTrainingSpec,
+                });
+            }
+        });
+        formData.append(constants.TRAINING_SPEC, JSON.stringify(trainingSpec));
     };
 
     const buildFromObject = (formData: FormDataStruct) => {
@@ -112,8 +112,8 @@ export default function CreateBotPage({
             constants.BOT_DESCRIPTION,
             formData.bot_description
         );
-        if (avatarImage){
-            uploadFormPayload.append(constants.BOT_AVATAR, avatarImage)
+        if (avatarImage) {
+            uploadFormPayload.append(constants.BOT_AVATAR, avatarImage);
         }
         return uploadFormPayload;
     };
@@ -149,7 +149,7 @@ export default function CreateBotPage({
     };
 
     const validateTrainingInputs = function () {
-        const errors = trainingDataInputState.reduce((acc: string[], v) => {
+        const errors = trainingDataInputs.reduce((acc: string[], v) => {
             if (!v.isValid()) {
                 acc.push(...v.errors);
             }
@@ -249,39 +249,52 @@ export default function CreateBotPage({
                                     Training Data
                                 </FormLabel>
                                 <div className="ml-3">
-                                    {trainingDataErrors?.map((error, index) => (
+                                    {/* {trainingDataErrors?.map((error, index) => (
                                         <span
                                             className="text-red-500 mt-2 text-sm"
                                             key={index}
                                         >
                                             {error}
                                         </span>
-                                    ))}
+                                    ))} */}
                                 </div>
                                 <div className="w-[60%]">
-                                    {trainingDataInputState.map(
-                                        (schema, index) => {
-                                            if (
-                                                schema.type ==
-                                                constants.TrainingAssetTypes
-                                                    .Files
-                                            ) {
-                                                return (
-                                                    <FileTrainingDataInput
-                                                        key={index}
-                                                        onFileChange={(
-                                                            value
-                                                        ) => {
-                                                            schema.setValue(
-                                                                value
+                                    {trainingDataInputs.map((tdi, idx) => {
+                                        if (
+                                            tdi.type ==
+                                            constants.TrainingAssetTypes.Files
+                                        ) {
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={`rounded-lg mt-1.5 ${
+                                                        !tdi.isValid()
+                                                            ? "border-red-500 border-2"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <TrainingFilesInputV2
+                                                        state={tdi.value}
+                                                        onUpdate={(ftd) => {
+                                                            const newState =
+                                                                new TrainingFilesInputConfigV2();
+                                                            newState.setValue(
+                                                                ftd
                                                             );
-                                                            validateTrainingInputs();
+                                                            trainingDataInputs[
+                                                                idx
+                                                            ] = newState;
+                                                            setTrainingDataInputs(
+                                                                [
+                                                                    ...trainingDataInputs,
+                                                                ]
+                                                            );
                                                         }}
                                                     />
-                                                );
-                                            }
+                                                </div>
+                                            );
                                         }
-                                    )}
+                                    })}
                                 </div>
                             </div>
                         </div>
