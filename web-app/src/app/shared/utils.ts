@@ -52,6 +52,9 @@ export class TrainingFilesInputConfigV2
 
     isValid() {
         this.errors = [];
+        if (this.value.length == 0) {
+            this.errors.push("Training files are required");
+        }
         let { size: totalUploadSize } = this.value.reduce(
             (agg, val) => {
                 if (val.value.context.length == 0) {
