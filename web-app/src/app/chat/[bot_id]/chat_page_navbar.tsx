@@ -24,8 +24,10 @@ import Image from "next/image";
 
 export function ChatPageNav({
     bot_details,
+    created_by_user_details,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
+    created_by_user_details: typeof schemas.user.$inferSelect;
 }) {
     return (
         <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5 fixed bg-white">
@@ -68,9 +70,7 @@ export function ChatPageNav({
                                 <p>{bot_details.description}</p>
                                 <p className="mt-3">
                                     <span>Created by </span>
-                                    <span>
-                                        {bot_details.created_by_user_id}
-                                    </span>
+                                    <span>{created_by_user_details.name}</span>
                                 </p>
                             </div>
                         </DialogContent>

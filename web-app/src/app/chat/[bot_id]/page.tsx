@@ -12,10 +12,15 @@ export default async function ChatPageRoot({
 }: {
     params: { bot_id: number };
 }) {
-    const [botDetails] = await db_client
+    const [{ bot_details: botDetails, users }] = await db_client
         .select()
         .from(schema.botDetails)
-        .where(eq(schema.botDetails.id, params.bot_id));
+        .innerJoin(
+            schema.user,
+            eq(schema.botDetails.created_by_user_id, schema.user.id)
+        )
+        .where(eq(schema.botDetails.id, params.bot_id))
+        .limit(1);
 
     let chatHistory: ChatMessage[] = [];
     let userSessionId: string | null = null;
@@ -77,6 +82,7 @@ export default async function ChatPageRoot({
             session_id={userSessionId!!}
             suggested_questions={suggestedQuestions}
             auth_token={authToken}
+            created_by_user={users}
         />
     );
 }

@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import NextAuth from "next-auth";
+import NextAuth, { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import * as jwt from "jsonwebtoken";
 import { createUser, getUserByEmail } from "./services/user";
@@ -44,10 +44,9 @@ export const authConfig = {
                         iat: profile.iat,
                     },
                     process.env.NEXTAUTH_SECRET!!,
-			{
-	expiresIn:'1y'
-}
-
+                    {
+                        expiresIn: "1y",
+                    }
                 );
             }
             return token;
@@ -62,3 +61,5 @@ export const authConfig = {
 } satisfies NextAuthOptions;
 
 export const handlers = NextAuth(authConfig);
+
+export const getUser = async () => getServerSession(authConfig);

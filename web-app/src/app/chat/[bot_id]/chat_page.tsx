@@ -18,12 +18,14 @@ export default function ChatPage({
     session_id,
     suggested_questions,
     auth_token,
+    created_by_user,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
     chat_history: (ChatMessage & { animate?: boolean })[];
     session_id: string;
     suggested_questions: string[];
     auth_token: string;
+    created_by_user:typeof schemas.user.$inferSelect;
 }) {
     const [history, setChatHistory] = useState(chat_history);
     const [enableInput, setInputEnabled] = useState(true);
@@ -111,7 +113,7 @@ export default function ChatPage({
     return (
         <div className="flex flex-col h-[100vh]">
             <div className="overflow-y-scroll mb-5 flex-auto" id="messages">
-                <ChatPageNav bot_details={bot_details} />
+                <ChatPageNav bot_details={bot_details} created_by_user_details={created_by_user} />
                 <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
                     <div
                         className="flex-auto  flex flex-col mb-4"

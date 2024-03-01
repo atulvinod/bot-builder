@@ -5,14 +5,18 @@ import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
+import { getUser } from "@/lib/auth";
 
 export default async function ViewBotsPage() {
-
+    const session = await getUser();
     const bots = await db_client
         .select()
         .from(schema.botDetails)
-        .where(eq(schema.botDetails.created_by_user_id, 1));
+        .innerJoin(
+            schema.user,
+            eq(schema.user.id, schema.botDetails.created_by_user_id)
+        )
+        .where(eq(schema.botDetails.created_by_user_id, session?.user!!.id));
 
     return (
         <div>
@@ -28,11 +32,11 @@ export default async function ViewBotsPage() {
                 {bots.map((m, i) => (
                     <BotDescription
                         key={i}
-                        bot_description={m.description}
-                        bot_name={m.name}
-                        bot_id={m.id}
-                        status={m.status ?? "queued"}
-                        avatar_image={m.avatar_image}
+                        bot_description={m.bot_details.description}
+                        bot_name={m.bot_details.name}
+                        bot_id={m.bot_details.id}
+                        status={m.bot_details.status ?? "queued"}
+                        avatar_image={m.bot_details.avatar_image}
                     />
                 ))}
             </div>

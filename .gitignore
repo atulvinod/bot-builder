@@ -757,3 +757,4 @@ $RECYCLE.BIN/
 appenv
 flaskenv
 firebase_service_account_config.json
+.vscode
