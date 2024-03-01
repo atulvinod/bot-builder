@@ -1,7 +1,7 @@
 import "./custom-modal.style.css";
 import Modal from "react-modal";
 import { Button } from "@/components/ui/button";
-import { Cross } from "lucide-react";
+import { X } from "lucide-react";
 
 export const CustomModal = ({
     modalTitle,
@@ -32,7 +32,7 @@ export const CustomModal = ({
                         onClick={() => setModalIsOpen(false)}
                         variant={"default"}
                     >
-                        <Cross className="button-icon icon-color-white" />
+                        <X className="button-icon icon-color-white" />
                     </Button>
                 </div>
                 <div style={{ marginTop: "20px", flex: "1" }}>{children}</div>

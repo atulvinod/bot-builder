@@ -3,7 +3,13 @@ import "react-image-crop/dist/ReactCrop.css";
 import { v4 as uuidv4 } from "uuid";
 
 import { Camera } from "lucide-react";
-import { ChangeEvent, MutableRefObject, useRef, useState } from "react";
+import {
+    ChangeEvent,
+    MutableRefObject,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { PercentCrop, PixelCrop, ReactCrop } from "react-image-crop";
 import { Button } from "@/components/ui/button";
 import { canvasPreview } from "./canvas-preview";
@@ -56,6 +62,7 @@ export const ImageInput = ({
                 return;
             }
             const blobURL = URL.createObjectURL(blob);
+            console.log(blobURL);
             backgroundRef.current!!.style.background = `url(${blobURL})`;
             const file = new File([blob], uuidv4(), { type: blob.type });
             if (handleSetImage) {
@@ -64,6 +71,26 @@ export const ImageInput = ({
             }
         });
     };
+
+    useEffect(() => {
+        if (
+            !imageRef.current ||
+            !canvasRef.current ||
+            !completedCrop ||
+            !backgroundRef.current
+        ) {
+            return;
+        }
+        canvasPreview(imageRef.current, canvasRef.current, completedCrop);
+        canvasRef.current.toBlob((blob) => {
+            if (!blob) {
+                return;
+            }
+            const blobURL = URL.createObjectURL(blob);
+            console.log(blobURL);
+            backgroundRef.current!!.style.background = `url(${blobURL})`;
+        });
+    }, [completedCrop]);
 
     return (
         <div>
@@ -97,6 +124,7 @@ export const ImageInput = ({
                         onComplete={(c) => setCompletedCrop(c)}
                         style={{
                             marginTop: "5rem",
+                            flex: "1",
                         }}
                     >
                         <img

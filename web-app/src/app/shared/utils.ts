@@ -4,7 +4,7 @@ import { TrainingAssetTypes } from "../../lib/constants";
 import {
     FileTrainingData,
     FileTrainingDataSchema,
-} from "./components/file_training_data_input_2";
+} from "./components/file_training_data_input";
 export class TrainingFilesInputConfig
     implements TrainingDataInputsSchema<File[]>
 {
@@ -58,10 +58,10 @@ export class TrainingFilesInputConfigV2
         let { size: totalUploadSize } = this.value.reduce(
             (agg, val) => {
                 if (val.value.context.length == 0) {
-                    this.errors.push("Context cannot be empty");
+                    this.errors.push("Context is required");
                 }
                 if (val.value.files.length == 0) {
-                    this.errors.push("Files cannot be empty");
+                    this.errors.push("Files are required");
                 }
                 let size = val.value.files.reduce((agg2, val2) => {
                     return agg2 + bytesToMB(val2.size);

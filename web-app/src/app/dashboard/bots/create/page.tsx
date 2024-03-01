@@ -1,6 +1,5 @@
 "use client";
 
-import { v4 as uuidv4 } from "uuid";
 import {
     Button as AppButton,
     ButtonVariants,
@@ -21,24 +20,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import FileTrainingDataInput from "@/app/shared/components/file_training_data_input";
 import { useRef, useState } from "react";
 import {
     TrainingData,
-    TrainingDataInputsSchema,
     TrainingFilesConfig,
 } from "@/app/shared/components/interfaces";
-import {
-    TrainingFilesInputConfig,
-    TrainingFilesInputConfigV2,
-} from "@/app/shared/utils";
+import { TrainingFilesInputConfigV2 } from "@/app/shared/utils";
 import * as constants from "@/lib/constants";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ImageInput } from "@/app/shared/components/image-input/image-input";
 import TrainingFilesInputV2, {
     FileTrainingData,
-} from "@/app/shared/components/file_training_data_input_2";
+} from "@/app/shared/components/file_training_data_input";
 
 const formSchema = z.object({
     botname: z
@@ -61,7 +55,9 @@ const formSchema = z.object({
 
 export default function CreateBotPage() {
     const router = useRouter();
-    const [trainingDataErrors, setTrainingDataErrors] = useState<string[]>();
+    const [trainingDataErrors, setTrainingDataErrors] = useState<string[][]>(
+        []
+    );
     const [isRequestProcessing, setIsRequestProcessing] =
         useState<boolean>(false);
     const [avatarImage, setAvatarImage] = useState<File>();
@@ -119,8 +115,7 @@ export default function CreateBotPage() {
     };
 
     const publishBot = async (formData: FormDataStruct) => {
-        validateTrainingInputs();
-        const isTrainingDataValid = (trainingDataErrors ?? []).length == 0;
+        const isTrainingDataValid = validateTrainingInputs();
         if (!isTrainingDataValid) {
             return;
         }
@@ -148,22 +143,34 @@ export default function CreateBotPage() {
         }
     };
 
+    /**
+     * Submit attempted function here is to control the application of validation.
+     * Only apply validation when the form has submitted at least once
+     */
+    const submitAttempted = useRef(false);
     const validateTrainingInputs = function () {
-        const errors = trainingDataInputs.reduce((acc: string[], v) => {
-            if (!v.isValid()) {
-                acc.push(...v.errors);
+        if (!submitAttempted.current) {
+            return null;
+        }
+        let errors: string[][] = [];
+        trainingDataInputs.forEach((input) => {
+            if (!input.isValid()) {
+                errors.push(input.errors);
             }
-            return acc;
-        }, []);
+        });
         setTrainingDataErrors(errors);
+        return !!!errors.length;
     };
 
-    const formRef = useRef<HTMLFormElement>(null);
-
-    //TODO: proxy handle submit to invoke file input validation
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(publishBot)} ref={formRef}>
+            <form
+                onSubmit={(e) => {
+                    submitAttempted.current = true;
+                    validateTrainingInputs();
+                    form.handleSubmit(publishBot)(e);
+                }}
+            >
                 <div>
                     <HeadingWithSideActionButton heading={"Create new bot"}>
                         <AppButton
@@ -245,51 +252,52 @@ export default function CreateBotPage() {
                                 )}
                             />
                             <div className="mt-10">
-                                <FormLabel className="text-lg">
+                                <FormLabel
+                                    className={
+                                        "text-lg " +
+                                        (submitAttempted.current &&
+                                        trainingDataErrors.length
+                                            ? "text-destructive"
+                                            : "")
+                                    }
+                                >
                                     Training Data
                                 </FormLabel>
-                                <div className="ml-3">
-                                    {/* {trainingDataErrors?.map((error, index) => (
-                                        <span
-                                            className="text-red-500 mt-2 text-sm"
-                                            key={index}
-                                        >
-                                            {error}
-                                        </span>
-                                    ))} */}
-                                </div>
-                                <div className="w-[60%]">
+                                <div className="w-[60%] mt-1.5">
                                     {trainingDataInputs.map((tdi, idx) => {
                                         if (
                                             tdi.type ==
                                             constants.TrainingAssetTypes.Files
                                         ) {
                                             return (
-                                                <div
-                                                    key={idx}
-                                                    className={`rounded-lg mt-1.5 ${
-                                                        !tdi.isValid()
-                                                            ? "border-red-500 border-2"
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    <TrainingFilesInputV2
-                                                        state={tdi.value}
-                                                        onUpdate={(ftd) => {
-                                                            const newState =
-                                                                new TrainingFilesInputConfigV2();
-                                                            newState.setValue(
-                                                                ftd
-                                                            );
-                                                            trainingDataInputs[
+                                                <div key={idx}>
+                                                    <div>
+                                                        <TrainingFilesInputV2
+                                                            state={tdi.value}
+                                                            onUpdate={(ftd) => {
+                                                                const newState =
+                                                                    new TrainingFilesInputConfigV2();
+                                                                newState.setValue(
+                                                                    ftd
+                                                                );
+                                                                trainingDataInputs[
+                                                                    idx
+                                                                ] = newState;
+                                                                setTrainingDataInputs(
+                                                                    [
+                                                                        ...trainingDataInputs,
+                                                                    ]
+                                                                );
+                                                                validateTrainingInputs();
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <TrainingErrors
+                                                        errors={
+                                                            trainingDataErrors[
                                                                 idx
-                                                            ] = newState;
-                                                            setTrainingDataInputs(
-                                                                [
-                                                                    ...trainingDataInputs,
-                                                                ]
-                                                            );
-                                                        }}
+                                                            ]
+                                                        }
                                                     />
                                                 </div>
                                             );
@@ -302,5 +310,20 @@ export default function CreateBotPage() {
                 </div>
             </form>
         </Form>
+    );
+}
+
+function TrainingErrors({ errors }: { errors: string[] }) {
+    return (
+        <div className="ml-5 mt-1.5">
+            <ul className="list-disc marker:text-red-500">
+                {!!errors &&
+                    errors.map((error, idx) => (
+                        <li key={idx}>
+                            <p className="text-destructive text-md">{error}</p>
+                        </li>
+                    ))}
+            </ul>
+        </div>
     );
 }
