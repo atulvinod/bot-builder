@@ -52,12 +52,22 @@ export class TrainingFilesInputConfigV2
 
     isValid() {
         this.errors = [];
-        let totalUploadSize = this.value.reduce((agg, val) => {
-            let size = val.value.files.reduce((agg2, val2) => {
-                return agg2 + bytesToMB(val2.size);
-            }, 0);
-            return agg + size;
-        }, 0);
+        let { size: totalUploadSize } = this.value.reduce(
+            (agg, val) => {
+                if (val.value.context.length == 0) {
+                    this.errors.push("Context cannot be empty");
+                }
+                if (val.value.files.length == 0) {
+                    this.errors.push("Files cannot be empty");
+                }
+                let size = val.value.files.reduce((agg2, val2) => {
+                    return agg2 + bytesToMB(val2.size);
+                }, 0);
+                agg.size += size;
+                return agg;
+            },
+            { size: 0 }
+        );
 
         const isUnderUploadLimit =
             totalUploadSize <=
@@ -66,7 +76,8 @@ export class TrainingFilesInputConfigV2
         if (!isUnderUploadLimit) {
             this.errors.push("Files exceed total upload size");
         }
-        return isUnderUploadLimit;
+
+        return !this.errors.length;
     }
     setValue(o: FileTrainingData[]) {
         this.value = o;
