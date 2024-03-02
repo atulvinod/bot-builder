@@ -217,10 +217,12 @@ function ActionButtons({ status, bot_id }: { status: string; bot_id: number }) {
                     </TooltipProvider>
                 )}
             </div>
-            <AppButton
-                variant={ButtonVariants.Danger}
-                buttonText={"Delete"}
-            ></AppButton>
+            {status == "created" && (
+                <AppButton
+                    variant={ButtonVariants.Danger}
+                    buttonText={"Delete"}
+                ></AppButton>
+            )}
         </div>
     );
 }

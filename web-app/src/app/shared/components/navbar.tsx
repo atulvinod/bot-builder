@@ -1,13 +1,14 @@
-import Image from "next/image";
 import AvatarImage from "./avatar_image";
 import { getServerSession } from "next-auth";
+import Breadcrumbs from "./breadcrumbs";
+
 export default async function Navbar() {
     const session = await getServerSession();
-
     return (
         <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5">
-            <div>
+            <div className="flex items-center">
                 <h1>Navbar Logo</h1>
+                <Breadcrumbs />
             </div>
             <div>
                 <AvatarImage path={session?.user?.image}></AvatarImage>
