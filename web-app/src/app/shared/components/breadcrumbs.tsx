@@ -12,17 +12,17 @@ export default function Breadcrumbs() {
     const segmentComponents = segments.reduce(
         (
             agg: { current_url: string; segments: React.ReactElement[] },
-            v,
+            urlComponent,
             idx
         ) => {
-            agg.current_url += "/" + v;
+            agg.current_url += "/" + urlComponent;
 
             agg.segments.push(
                 <div key={idx} className="flex items-center ">
                     <span className="text-gray-400 mx-2"> / </span>
                     <Link href={agg.current_url}>
                         <span className="border rounded-sm p-1 px-2 capitalize">
-                            {v}
+                            {urlComponent}
                         </span>
                     </Link>
                 </div>
