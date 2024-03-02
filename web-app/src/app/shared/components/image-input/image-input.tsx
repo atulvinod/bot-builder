@@ -95,7 +95,7 @@ export const ImageInput = ({
     return (
         <div>
             <div
-                className="user-image-input-container"
+                className="user-image-input-container shadow-lg border-2 "
                 onClick={handleClick}
                 ref={backgroundRef}
                 style={{
@@ -109,6 +109,7 @@ export const ImageInput = ({
                     onChange={handleFileChange}
                     accept="image/png"
                 />
+
                 <Camera />
             </div>
             <CustomModal

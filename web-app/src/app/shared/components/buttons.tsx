@@ -39,20 +39,20 @@ const buttonVariants: {
 } = {
     [ButtonVariants.Magic]: {
         bgColor: "appParrot",
-        textColor: "#000000",
+        textColor: "[#000000]",
         icon: getSVGIcon(sparking),
     },
     [ButtonVariants.Muted]: {
         bgColor: "appGrey",
-        textColor: "#000000",
+        textColor: "[#000000]",
     },
     [ButtonVariants.Danger]: {
         bgColor: "appDangerRed",
-        textColor: "#000000",
+        textColor: "white",
     },
     [ButtonVariants.Loading]: {
         bgColor: "yellow-100",
-        textColor: "#000000",
+        textColor: "[#000000]",
         icon: <Loader2 className="mr-2 h-4 w-4 animate-spin" />,
     },
 };
@@ -98,16 +98,20 @@ export function Button({
         ...buttonSizeConfigs[size],
         ...(sizeConfigOverrides ?? {}),
     };
-    const padding = buttonText ? "px-5" : ( size != ButtonSize.Large ? "p-3": "p-5");
+    const padding = buttonText
+        ? "px-5"
+        : size != ButtonSize.Large
+        ? "p-3"
+        : "p-5";
     const height = buttonText ? dimensions.height : "";
     return (
         <button
             type={type}
-            className={`bg-${style.bgColor} text-[${style.textColor}] ${height} ${padding} rounded-full flex flex-row items-center`}
+            className={`bg-${style.bgColor}  ${height} ${padding} rounded-full flex flex-row items-center`}
             {...props}
         >
             {icon ?? style.icon}
-            <span>{buttonText}</span>
+            <span className={`text-${style.textColor}`}>{buttonText}</span>
         </button>
     );
 }

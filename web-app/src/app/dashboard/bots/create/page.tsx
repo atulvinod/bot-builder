@@ -210,7 +210,7 @@ export default function CreateBotPage() {
                                                 <FormControl>
                                                     <Input
                                                         {...field}
-                                                        placeholder="Add a bot name!"
+                                                        placeholder="Add a bot name"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -234,7 +234,7 @@ export default function CreateBotPage() {
                                         <FormControl>
                                             <Textarea
                                                 {...field}
-                                                placeholder="Add a bot name!"
+                                                placeholder="Add a bot description"
                                             />
                                         </FormControl>
                                         <FormMessage />

@@ -19,6 +19,7 @@ import {
     TrainingData,
     TrainingFilesConfig,
 } from "@/app/shared/components/interfaces";
+import { bytesToMB } from "@/app/shared/utils";
 
 async function handleFilesTrainingData(
     assets_id: string,
@@ -35,6 +36,17 @@ async function handleFilesTrainingData(
             `training/${assets_id}`,
             tds.files_id,
             files as File[]
+        );
+        
+        training_schema[i].files = (files as File[]).reduce(
+            (agg: { name: string; size: string }[], f) => {
+                agg.push({
+                    name: f.name,
+                    size: bytesToMB(f.size).toFixed(2),
+                });
+                return agg;
+            },
+            []
         );
 
         uploadRefs.push(fileZipUploadRef.ref);

@@ -28,18 +28,20 @@ export default function BotDescription({
             className="rounded-lg bg-appGrey p-5  cursor-pointer"
             onClick={() => router.push(botLink)}
         >
-            <div>
+            <div className="h-full flex flex-col">
                 <div className="flex flex-row items-center">
                     <AvatarImage path={avatar_image}></AvatarImage>
                     <span className="text-lg ml-3 break-all">{bot_name}</span>
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 flex-auto">
                     <p className="text-slate-500 text-sm break-all">
                         {bot_description}
                     </p>
                 </div>
                 <div className="mt-3">
-                    {["queued", "inprogress"].includes(status) && (
+                    {["queued", "inprogress", "failed_queue_push"].includes(
+                        status
+                    ) && (
                         <Badge
                             variant={"outline"}
                             className="bg-yellow-100 h-7"

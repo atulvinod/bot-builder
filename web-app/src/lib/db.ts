@@ -11,4 +11,6 @@ const client = postgres({
     database: process.env.DB_DATABASE,
 });
 
-export const db_client = drizzle(client);
+let _client = drizzle(client);
+
+export const db_client = _client;

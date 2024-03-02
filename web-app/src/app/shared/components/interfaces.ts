@@ -11,6 +11,7 @@ export interface TrainingDataInputsSchema<DataContainerType> {
 export interface TrainingFilesConfig {
     context: string;
     files_id: string;
+    files?: { name: string; size: string }[];
 }
 
 export interface TrainingData {

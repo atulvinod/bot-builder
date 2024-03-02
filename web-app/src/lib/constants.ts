@@ -12,3 +12,5 @@ export enum TrainingAssetTypes {
 export const inputTypeToFormKeyMap = {
     [TrainingAssetTypes.Files]: TRAINING_DATA_FILE,
 };
+
+export const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/pixel-art/svg"

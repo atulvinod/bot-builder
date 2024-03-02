@@ -5,7 +5,14 @@ import { ChangeEvent, useRef, useState } from "react";
 import fileSvg from "../../../svgs/file.svg";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, FolderOpen, X, PlusIcon, Trash2 } from "lucide-react";
+import {
+    ExternalLink,
+    FolderOpen,
+    X,
+    PlusIcon,
+    Trash2,
+    FolderUp,
+} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -49,9 +56,10 @@ export default function TrainingFilesInputV2({
         return acc + size;
     }, 0);
 
-    const hasReachedUploadQuota = () =>
+    const isInvalidUpload = () =>
         totalSelectedFileSize >=
-        Number(process.env.NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB);
+            Number(process.env.NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB) ||
+        totalSelectedFileSize == 0;
 
     function updateDataSegmentState(
         id: number,
@@ -76,77 +84,87 @@ export default function TrainingFilesInputV2({
                     ></Image>
                 </div>
                 <div className="flex-auto">
-                    <div className="ml-2 flex-auto flex justify-between">
+                    <div className="ml-2 flex-auto flex justify-between items-center">
                         <h1 className="text-2xl">Files</h1>
-                        <Dialog modal={true}>
-                            <DialogTrigger>
-                                <ExternalLink />
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Add Training Files
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <hr />
-                                <div>
-                                    <span
-                                        className={`text-sm ${
-                                            hasReachedUploadQuota()
-                                                ? "text-red-500"
-                                                : ""
-                                        }`}
-                                    >
-                                        {`Total upload size : ${totalSelectedFileSize.toFixed(
-                                            2
-                                        )} / ${
-                                            process.env
-                                                .NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB
-                                        } MB`}
-                                    </span>
-                                </div>
-                                <div>
-                                    {state.map((d, idx: number) => (
-                                        <TrainingDataSegmentComponent
-                                            key={idx}
-                                            state={d}
-                                            notifyChange={(
-                                                context: string,
-                                                files: File[]
-                                            ) => {
-                                                updateDataSegmentState(
-                                                    idx,
-                                                    context,
-                                                    files
-                                                );
-                                            }}
-                                            onDelete={() => {
-                                                state.splice(idx, 1);
-                                                onUpdate(state);
-                                            }}
-                                        />
-                                    ))}
-                                    <div className="flex justify-center">
-                                        <Button
-                                            variant={"outline"}
-                                            className="mt-2"
-                                            onClick={() => {
-                                                const new_state = [
-                                                    ...state,
-                                                    new FileTrainingData(
-                                                        state.length + 1
-                                                    ),
-                                                ];
-                                                onUpdate(new_state);
-                                            }}
+                        <div className="flex items-center">
+                            <span
+                                className={
+                                    "mr-2  " +
+                                    (isInvalidUpload() ? "text-red-500" : "")
+                                }
+                            >
+                                {totalSelectedFileSize.toFixed(2)} MB
+                            </span>
+                            <Dialog modal={true}>
+                                <DialogTrigger>
+                                    <FolderUp />
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Add Training Files
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <hr />
+                                    <div>
+                                        <span
+                                            className={`text-sm ${
+                                                isInvalidUpload()
+                                                    ? "text-red-500"
+                                                    : ""
+                                            }`}
                                         >
-                                            <PlusIcon className="mr-2 h-4 w-4" />
-                                            Add
-                                        </Button>
+                                            {`Total upload size : ${totalSelectedFileSize.toFixed(
+                                                2
+                                            )} / ${
+                                                process.env
+                                                    .NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB
+                                            } MB`}
+                                        </span>
                                     </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                                    <div>
+                                        {state.map((d, idx: number) => (
+                                            <TrainingDataSegmentComponent
+                                                key={idx}
+                                                state={d}
+                                                notifyChange={(
+                                                    context: string,
+                                                    files: File[]
+                                                ) => {
+                                                    updateDataSegmentState(
+                                                        idx,
+                                                        context,
+                                                        files
+                                                    );
+                                                }}
+                                                onDelete={() => {
+                                                    state.splice(idx, 1);
+                                                    onUpdate(state);
+                                                }}
+                                            />
+                                        ))}
+                                        <div className="flex justify-center">
+                                            <Button
+                                                variant={"outline"}
+                                                className="mt-2"
+                                                onClick={() => {
+                                                    const new_state = [
+                                                        ...state,
+                                                        new FileTrainingData(
+                                                            state.length + 1
+                                                        ),
+                                                    ];
+                                                    onUpdate(new_state);
+                                                }}
+                                            >
+                                                <PlusIcon className="mr-2 h-4 w-4" />
+                                                Add
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </div>
             </div>
