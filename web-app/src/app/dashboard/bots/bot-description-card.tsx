@@ -24,7 +24,7 @@ export default function BotDescription({
     const botLink = `/dashboard/bots/${bot_id}`;
     return (
         <div
-            className="rounded-lg bg-appGrey p-5  cursor-pointer"
+            className="rounded-lg bg-appGrey p-5  cursor-pointer transition-all hover:shadow-lg"
             onClick={() => window.open(botLink)}
         >
             <div className="h-full flex flex-col">
@@ -49,7 +49,12 @@ export default function BotDescription({
                         </Badge>
                     )}
                     {status == "created" && (
-                        <Link href={`/chat/${bot_id}`}>
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`/chat/${bot_id}`);
+                            }}
+                        >
                             <Badge
                                 variant={"outline"}
                                 className="bg-green-400 h-7"
@@ -63,7 +68,7 @@ export default function BotDescription({
                                     className="ml-1"
                                 ></Image>
                             </Badge>
-                        </Link>
+                        </div>
                     )}
                 </div>
             </div>

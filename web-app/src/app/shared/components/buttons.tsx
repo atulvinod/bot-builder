@@ -89,6 +89,7 @@ export function Button({
     type?: "button" | "submit" | "reset" | undefined;
     variantConfigOverrides?: variantConfig;
     sizeConfigOverrides?: sizeConfig;
+    props: any
 }) {
     const style = {
         ...buttonVariants[variant],
