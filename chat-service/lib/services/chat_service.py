@@ -1,24 +1,19 @@
-from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.core import VectorStoreIndex
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index.core.query_engine import SubQuestionQueryEngine
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.agent.openai import OpenAIAgent
-from llama_index.core.storage.chat_store import SimpleChatStore
-from llama_index.core.memory import ChatMemoryBuffer
 from typing import List
 from ..utils.constants import TrainingAssetTypes
-from ..utils.pinecone_client import PineconeClient
-from ..utils.redis_client import RedisClient
-from ..utils.db_client import DB
 from ..utils.util import convertChatMessagesToJSON
 import json
 import uuid
+from lib.utils.app_error import AppError
 
-db = DB().getClient()
-pinecone = PineconeClient().getClient()
-redis = RedisClient().getClient()
-
+from app import redis
+from app import pinecone
+from app import db
+import logging
 
 def getBotSpec(bot_id: int):
     cacheKey = f"bot-spec:{bot_id}"
@@ -71,7 +66,7 @@ def getAgent(bot_id:int, user_session_key:str="system"):
 
         if trainingConfig['type'] == TrainingAssetTypes.Files.value:
 
-            for fileConfig in trainingConfig['config']:
+            for index, fileConfig in enumerate(trainingConfig['config']):
                 pineconeIndex = pinecone.Index(f"files-{str(bot_id)}-{fileConfig['files_id'].lower()}")
                 vectorStore = PineconeVectorStore(pinecone_index=pineconeIndex)
                 vectorIndex = VectorStoreIndex.from_vector_store(vector_store=vectorStore)
@@ -79,7 +74,7 @@ def getAgent(bot_id:int, user_session_key:str="system"):
                 queryEngineTool = QueryEngineTool(
                     query_engine=queryEngine,
                     metadata=ToolMetadata(
-                        name=f"collection of files related to '{fileConfig['context']}'", description=fileConfig['context']
+                        name= f"file-collection-{index}", description=f"collection of files related to the following context - {fileConfig['context']}"
                     ),
                 )
                 queryEngineTools.append(queryEngineTool)
@@ -102,6 +97,7 @@ def getResponseStreamForQuery(bot_id: int, user_session_key, user_question: str)
 
     updateChatHistory(
         bot_id,
+        user_session_key,
         chat_history,
         [
             ChatMessage(role=MessageRole.USER, content=user_question),
@@ -135,7 +131,8 @@ def getSuggestedQuestions(bot_id):
         questions = agentResponse.split(' | ')
         redis.set(cache_key, json.dumps({"questions":questions}))
         return questions
-    except:
+    except Exception as e:
+        logging.error(e)
         return []
 
 def getChatSession(bot_id, user_id):
@@ -146,3 +143,14 @@ def getChatSession(bot_id, user_id):
         return uid
     
     return session
+
+
+def resetChatSession(bot_id, user_id, session_id):
+    session = db.one("SELECT id FROM chat_sessions WHERE session_id = %(session_id)s AND user_id = %(user_id)s and bot_id = %(bot_id)s", {"session_id":session_id, "user_id":user_id, "bot_id":bot_id})
+
+    if session is None:
+        raise AppError("Session not found",404)
+    
+    db.run("DELETE FROM chat_sessions WHERE session_id = %(session_id)s",{"session_id":session_id})
+        
+    return getChatSession(bot_id, user_id)

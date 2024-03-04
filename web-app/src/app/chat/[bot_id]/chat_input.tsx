@@ -9,6 +9,13 @@ import sendIcon from "../../../svgs/send.svg";
 import Image from "next/image";
 import { PulseLoader } from "react-spinners";
 import "animate.css";
+import sparking from "../../../svgs/sparkling.svg";
+import { SendHorizontal } from "lucide-react";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function ChatInput({
     onSubmit,
@@ -74,14 +81,7 @@ export function ChatInput({
                 {isInputEnabled && (
                     <Button
                         size={ButtonSize.Large}
-                        icon={
-                            <Image
-                                src={sendIcon}
-                                width={18}
-                                height={18}
-                                alt="send"
-                            />
-                        }
+                        icon={<SendHorizontal />}
                         variant={ButtonVariants.Muted}
                         onClick={handleSubmit}
                     />

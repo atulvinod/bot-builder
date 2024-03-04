@@ -1,5 +1,6 @@
 from postgres import Postgres
 import os
+import logging
 
 class DB:
     def __init__(self) -> None:
@@ -11,6 +12,7 @@ class DB:
         database = os.getenv("DB_DATABASE")
         host = os.getenv("DB_HOST")
         port = os.getenv('DB_PORT')
+        logging.info(f"Connecting to {host}:{port}")
         url = "postgres://{username}:{password}@{host}:{port}/{database}".format(username=username, password=password,database=database, host=host, port=port)
         return url
     

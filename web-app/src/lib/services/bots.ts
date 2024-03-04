@@ -81,9 +81,8 @@ async function generateBotSpec(
         }
     }
 
-    // TODO: uncomment
-    // const system_prompt = await ai.generateBotSystemPrompt(bot_description);
-    spec["system_prompt"] = "systemPrompt";
+    const systemPrompt = await ai.generateBotSystemPrompt(bot_description);
+    spec["system_prompt"] = systemPrompt;
     return [spec, uploadRefs];
 }
 
@@ -126,10 +125,13 @@ async function createBotDetails(
     return [inserted_value.id, uploadRefs];
 }
 
-async function pushToTaskQueue(bot_id: number) {
+export async function pushToTaskQueue(bot_id: number) {
     try {
         const redis_client = await getRedisClient();
-        await redis_client.lPush("task", JSON.stringify({ bot_id }));
+        const payload = JSON.stringify({ bot_id });
+        console.log(payload);
+        return;
+        await redis_client.lPush("task", payload);
     } catch (e) {
         await db_client
             .update(schemas.botDetails)

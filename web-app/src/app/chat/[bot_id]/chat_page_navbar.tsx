@@ -25,14 +25,16 @@ import Image from "next/image";
 export function ChatPageNav({
     bot_details,
     created_by_user_details,
+    on_clear_chat,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
     created_by_user_details: typeof schemas.user.$inferSelect;
+    on_clear_chat: () => void;
 }) {
     return (
         <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5 fixed bg-white">
             <div className="flex flex-row items-center">
-                <AvatarImage />
+                <AvatarImage path={bot_details.avatar_image} />
                 <span className="ml-2 text-xl">{bot_details.name}</span>
             </div>
             <div className="flex flex-row items-center">
@@ -40,23 +42,21 @@ export function ChatPageNav({
                     <Button
                         buttonText={"Clear Chat"}
                         variant={ButtonVariants.Muted}
+                        onClick={on_clear_chat}
                     />
                 </div>
 
-                <div className="ml-2">
+                <div className="ml-2 flex items-center">
                     <Dialog>
                         <DialogTrigger>
-                            <Button
-                                variant={ButtonVariants.Muted}
-                                icon={
-                                    <Image
-                                        alt="info-icon"
-                                        src={infoIcon}
-                                        width={20}
-                                        height={20}
-                                    />
-                                }
-                            />
+                            <NavButtonsContainer>
+                                <Image
+                                    alt="info-icon"
+                                    src={infoIcon}
+                                    width={20}
+                                    height={20}
+                                />
+                            </NavButtonsContainer>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -76,20 +76,17 @@ export function ChatPageNav({
                         </DialogContent>
                     </Dialog>
                 </div>
-                <div className="ml-2">
+                <div className="ml-2 flex items-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger>
-                            <Button
-                                variant={ButtonVariants.Muted}
-                                icon={
-                                    <Image
-                                        alt="more-icon"
-                                        src={moreIcon}
-                                        width={20}
-                                        height={20}
-                                    />
-                                }
-                            />
+                            <NavButtonsContainer onClick={() => {}}>
+                                <Image
+                                    alt="more-icon"
+                                    src={moreIcon}
+                                    width={20}
+                                    height={20}
+                                />
+                            </NavButtonsContainer>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                             <DropdownMenuLabel>Menu</DropdownMenuLabel>
@@ -114,5 +111,19 @@ export function ChatPageNav({
                 </div>
             </div>
         </nav>
+    );
+}
+
+function NavButtonsContainer({
+    children,
+    ...props
+}: {
+    children: React.ReactNode;
+    props?: any;
+}) {
+    return (
+        <div className="bg-appGrey rounded-full p-3" {...props}>
+            {children}
+        </div>
     );
 }

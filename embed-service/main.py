@@ -7,7 +7,9 @@ from app_queue import AppQueue
 
 from dotenv import load_dotenv
 
-if os.getenv("DB_HOST") is None:
+
+env = os.getenv("ENV")
+if env is None or env == "dev":
     load_dotenv()
 
 logging.basicConfig(
@@ -25,7 +27,7 @@ while True:
         logging.info('No value received, going to sleep')
         time.sleep(2)
     else:
-        logging.info('Received task')
+        logging.info('Received task : ', queue_value)
         bot_id = queue_value['bot_id']
         logging.info('Processing bot '+str(bot_id))
         bot_trainer.process(bot_id)

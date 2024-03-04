@@ -9,6 +9,7 @@ import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
 import * as schemas from "../../../schemas/schemas";
 
 import { ChatPageNav } from "./chat_page_navbar";
+import Loader from "@/app/shared/components/loader";
 
 const CHAT_SERVICE_HOST = getChatServiceHost();
 
@@ -25,9 +26,12 @@ export default function ChatPage({
     session_id: string;
     suggested_questions: string[];
     auth_token: string;
-    created_by_user:typeof schemas.user.$inferSelect;
+    created_by_user: typeof schemas.user.$inferSelect;
 }) {
     const [history, setChatHistory] = useState(chat_history);
+    const [currentSessionId, setSessionId] = useState(session_id);
+    const [isLoading, setLoading] = useState(false);
+
     const [enableInput, setInputEnabled] = useState(true);
     const [responseStream, setResponseStream] = useState<string | null>(null);
 
@@ -63,7 +67,7 @@ export default function ChatPage({
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "text/event-stream",
-                    "Chat-Session-Id": session_id,
+                    "Chat-Session-Id": currentSessionId,
                     Authorization: auth_token,
                 },
                 body: JSON.stringify({
@@ -110,57 +114,107 @@ export default function ChatPage({
         }
     }
 
+    async function clearChat() {
+        setLoading(true);
+        try {
+            const newSessionRequest = await fetch(
+                `${CHAT_SERVICE_HOST}/bot/${bot_details.id}/session/reset`,
+                {
+                    headers: {
+                        Authorization: auth_token,
+                        "Chat-Session-Id": currentSessionId,
+                    },
+                }
+            );
+            if (!newSessionRequest.ok) {
+                throw new Error("Failed to get new chat session");
+            }
+            const sessionRequestBody = await newSessionRequest.json();
+
+            setSessionId(sessionRequestBody.data.session);
+            setChatHistory([]);
+        } catch (ex) {
+            toast.error("Unable to reset chat history, please try again later");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
-        <div className="flex flex-col h-[100vh]">
-            <div className="overflow-y-scroll mb-5 flex-auto" id="messages">
-                <ChatPageNav bot_details={bot_details} created_by_user_details={created_by_user} />
-                <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
+        <div className="h-[100vh]">
+            {isLoading && (
+                <div className="flex flex-col h-full">
+                    <ChatPageNav
+                        bot_details={bot_details}
+                        created_by_user_details={created_by_user}
+                        on_clear_chat={() => {}}
+                    />
+                    <Loader />
+                </div>
+            )}
+            {!isLoading && (
+                <div className="h-full flex flex-col ">
                     <div
-                        className="flex-auto  flex flex-col mb-4"
+                        className="overflow-y-scroll mb-5 flex-auto"
                         id="messages"
                     >
-                        {history.map((h, i) => {
-                            return (
-                                <ChatBubble
-                                    role={h.role}
-                                    key={i}
-                                    animate={h.animate ?? false}
-                                >
-                                    <span>{h.content}</span>
-                                </ChatBubble>
-                            );
-                        })}
-                        {responseStream && (
-                            <ChatBubble role={"assistant"} animate={true}>
-                                <span>{responseStream}</span>
-                            </ChatBubble>
-                        )}
-                    </div>
-                    {history.length == 0 && (
-                        <div>
-                            {suggested_questions.map((q, i) => (
-                                <ChatBubble
-                                    role={"user"}
-                                    isMagic={true}
-                                    key={i}
-                                    animate={true}
-                                    onClick={() => {
-                                        getAnswer(q);
-                                    }}
-                                >
-                                    <span>{q}</span>
-                                </ChatBubble>
-                            ))}
+                        <ChatPageNav
+                            bot_details={bot_details}
+                            created_by_user_details={created_by_user}
+                            on_clear_chat={clearChat}
+                        />
+                        <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
+                            <div
+                                className="flex-auto  flex flex-col mb-4"
+                                id="messages"
+                            >
+                                {history.map((h, i) => {
+                                    return (
+                                        <ChatBubble
+                                            role={h.role}
+                                            key={i}
+                                            animate={h.animate ?? false}
+                                        >
+                                            <span>{h.content}</span>
+                                        </ChatBubble>
+                                    );
+                                })}
+                                {responseStream && (
+                                    <ChatBubble
+                                        role={"assistant"}
+                                        animate={true}
+                                    >
+                                        <span>{responseStream}</span>
+                                    </ChatBubble>
+                                )}
+                            </div>
+                            {history.length == 0 && (
+                                <div>
+                                    {suggested_questions.map((q, i) => (
+                                        <ChatBubble
+                                            role={"user"}
+                                            isMagic={true}
+                                            key={i}
+                                            animate={true}
+                                            onClick={() => {
+                                                getAnswer(q);
+                                            }}
+                                        >
+                                            <span>{q}</span>
+                                        </ChatBubble>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
+                    <div className="px-96 lg:px-56 pb-20">
+                        <ChatInput
+                            isInputEnabled={enableInput}
+                            onSubmit={(question) => getAnswer(question)}
+                        />
+                    </div>
                 </div>
-            </div>
-            <div className="px-96 lg:px-56 pb-20">
-                <ChatInput
-                    isInputEnabled={enableInput}
-                    onSubmit={(question) => getAnswer(question)}
-                />
-            </div>
+            )}
         </div>
     );
 }

@@ -11,6 +11,5 @@ export async function ServerAuthGuard({
     if (!session) {
         redirect("/");
     }
-	console.log("SESSION USER ",session);
     return <>{children}</>;
 }

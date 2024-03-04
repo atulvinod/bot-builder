@@ -2,6 +2,7 @@
 
 import {
     Button as AppButton,
+    Button,
     ButtonVariants,
 } from "@/app/shared/components/buttons";
 import HeadingWithSideActionButton from "@/app/shared/components/heading_with_side_action_button";
@@ -33,6 +34,7 @@ import { ImageInput } from "@/app/shared/components/image-input/image-input";
 import TrainingFilesInputV2, {
     FileTrainingData,
 } from "@/app/shared/components/file_training_data_input";
+import Link from "next/link";
 
 const formSchema = z.object({
     botname: z
@@ -60,6 +62,7 @@ export default function CreateBotPage() {
     );
     const [isRequestProcessing, setIsRequestProcessing] =
         useState<boolean>(false);
+
     const [avatarImage, setAvatarImage] = useState<File>();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -133,7 +136,8 @@ export default function CreateBotPage() {
             } else {
                 const body = await response.json();
                 router.replace(
-                    `/dashboard/bots/success?bot_id=${body.data.bot_id}`
+                    `/dashboard/bots/success?bot_id=${body.data.bot_id}`,
+                    {}
                 );
             }
         } catch (e: any) {
@@ -199,6 +203,9 @@ export default function CreateBotPage() {
                                             <div>
                                                 <div className="mt-2">
                                                     <ImageInput
+                                                        isDisabled={
+                                                            isRequestProcessing
+                                                        }
                                                         handleSetImage={
                                                             setAvatarImage
                                                         }
@@ -211,6 +218,9 @@ export default function CreateBotPage() {
                                                     <Input
                                                         {...field}
                                                         placeholder="Add a bot name"
+                                                        disabled={
+                                                            isRequestProcessing
+                                                        }
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -235,6 +245,7 @@ export default function CreateBotPage() {
                                             <Textarea
                                                 {...field}
                                                 placeholder="Add a bot description"
+                                                disabled={isRequestProcessing}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -273,6 +284,9 @@ export default function CreateBotPage() {
                                                 <div key={idx}>
                                                     <div>
                                                         <TrainingFilesInputV2
+                                                            isDisabled={
+                                                                isRequestProcessing
+                                                            }
                                                             state={tdi.value}
                                                             onUpdate={(ftd) => {
                                                                 const newState =
@@ -324,6 +338,26 @@ function TrainingErrors({ errors }: { errors: string[] }) {
                         </li>
                     ))}
             </ul>
+        </div>
+    );
+}
+
+function SuccessBanner({ name }: { name: string }) {
+    return (
+        <div>
+            <h1 className="text-7xl my-5">Success!</h1>
+            <div className="my-10">
+                <p className="w-[30%]">
+                    Your bot &quot;{name}&quot; being created, it will be ready
+                    in some time as we are training on your data. We will inform
+                    you once its ready
+                </p>
+            </div>
+            <div className="my-10">
+                <Link href={"/dashboard/bots"}>
+                    <Button buttonText="Go to dashboard"></Button>
+                </Link>
+            </div>
         </div>
     );
 }

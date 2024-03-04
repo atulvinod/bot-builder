@@ -1,7 +1,12 @@
-version: '3.1'
+version: "3.1"
 services:
-   embedding-service:
-    build:
-      context: ./botbuilder-embed-service
-    ports:
-      - 8000:8000
+    embedding-service:
+        build:
+            context: ./embed-service
+        ports:
+            - 8000:8000
+    chat-service:
+        build:
+            context: ./chat-service
+        ports:
+            - 5000:8000

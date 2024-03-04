@@ -1,14 +1,27 @@
-from flask import Flask
-from flask_cors import CORS
-
 import os
-from routes.bot import routeBlueprint
+import logging
 from dotenv import load_dotenv
 
-def create_app(test_config=None):
-    if os.getenv('DB_HOST') is None:
-        load_dotenv()
+env = os.getenv('ENV') 
+logging.info(f"App environment {env}")
+if env is None or  env == "dev":
+    logging.info(f"App environment not found, loading from .env")
+    load_dotenv()
+
     
+from lib.utils.pinecone_client import PineconeClient
+from lib.utils.redis_client import RedisClient
+from lib.utils.db_client import DB
+
+pinecone = PineconeClient().getClient()
+db = DB().getClient()
+redis = RedisClient().getClient()
+
+from flask import Flask
+from flask_cors import CORS
+from routes.bot import routeBlueprint
+
+def create_app(test_config=None): 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.getenv('NEXTAUTH_SECRET') or "secret"

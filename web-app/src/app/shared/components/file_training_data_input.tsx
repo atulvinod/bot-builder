@@ -45,8 +45,10 @@ export class FileTrainingData implements FileTrainingDataSchema {
 export default function TrainingFilesInputV2({
     state,
     onUpdate,
+    isDisabled = false,
 }: {
     state: FileTrainingData[];
+    isDisabled?: boolean;
     onUpdate: (ftd: FileTrainingData[]) => void;
 }) {
     const totalSelectedFileSize = state.reduce((acc, v) => {
@@ -95,54 +97,56 @@ export default function TrainingFilesInputV2({
                             >
                                 {totalSelectedFileSize.toFixed(2)} MB
                             </span>
-                            <Dialog modal={true}>
-                                <DialogTrigger>
-                                    <FolderUp />
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                            Add Training Files
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    <hr />
-                                    <div>
-                                        <span
-                                            className={`text-sm ${
-                                                isInvalidUpload()
-                                                    ? "text-red-500"
-                                                    : ""
-                                            }`}
-                                        >
-                                            {`Total upload size : ${totalSelectedFileSize.toFixed(
-                                                2
-                                            )} / ${
-                                                process.env
-                                                    .NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB
-                                            } MB`}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        {state.map((d, idx: number) => (
-                                            <TrainingDataSegmentComponent
-                                                key={idx}
-                                                state={d}
-                                                notifyChange={(
-                                                    context: string,
-                                                    files: File[]
-                                                ) => {
-                                                    updateDataSegmentState(
-                                                        idx,
-                                                        context,
-                                                        files
-                                                    );
-                                                }}
-                                                onDelete={() => {
-                                                    state.splice(idx, 1);
-                                                    onUpdate(state);
-                                                }}
-                                            />
-                                        ))}
+                            {!isDisabled && (
+                                <Dialog modal={true}>
+                                    <DialogTrigger>
+                                        <FolderUp />
+                                    </DialogTrigger>
+                                    <DialogContent className="max-h-[100vh] overflow-y-auto max-w-[90vw]">
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Add Training Files
+                                            </DialogTitle>
+                                        </DialogHeader>
+                                        <hr />
+                                        <div>
+                                            <span
+                                                className={`text-sm ${
+                                                    isInvalidUpload()
+                                                        ? "text-red-500"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {`Total upload size : ${totalSelectedFileSize.toFixed(
+                                                    2
+                                                )} / ${
+                                                    process.env
+                                                        .NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB
+                                                } MB`}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            {state.map((d, idx: number) => (
+                                                <TrainingDataSegmentComponent
+                                                    key={idx}
+                                                    state={d}
+                                                    notifyChange={(
+                                                        context: string,
+                                                        files: File[]
+                                                    ) => {
+                                                        updateDataSegmentState(
+                                                            idx,
+                                                            context,
+                                                            files
+                                                        );
+                                                    }}
+                                                    onDelete={() => {
+                                                        state.splice(idx, 1);
+                                                        onUpdate(state);
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
                                         <div className="flex justify-center">
                                             <Button
                                                 variant={"outline"}
@@ -161,9 +165,9 @@ export default function TrainingFilesInputV2({
                                                 Add
                                             </Button>
                                         </div>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -195,7 +199,7 @@ function TrainingDataSegmentComponent({
     }
 
     return (
-        <div className="flex flex-row mt-1">
+        <div className="flex flex-row mt-1 w-full">
             <div className="border-2 rounded-sm  p-4 w-full bg-appGrey ">
                 <div>
                     <div>
@@ -230,7 +234,7 @@ function TrainingDataSegmentComponent({
                         {files.map((f, idx) => (
                             <div
                                 key={idx}
-                                className=" rounded border-gray-500  border-1 flex items-center mt-0 ml-1"
+                                className=" rounded border-gray-500  border-1 flex items-center mt-0 ml-1 break-words"
                             >
                                 <span className="text-sm">{f.name}</span>
                                 <span className="ml-2">

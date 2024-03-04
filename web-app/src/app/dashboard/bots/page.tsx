@@ -3,11 +3,15 @@ import BotDescription from "./bot-description-card";
 import HeadingWithSideActionButton from "@/app/shared/components/heading_with_side_action_button";
 import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getUser } from "@/lib/auth";
+import { unstable_noStore } from "next/cache";
+
+export const dynamic = "force-dynamic";
 
 export default async function ViewBotsPage() {
+    unstable_noStore();
     const session = await getUser();
     const bots = await db_client
         .select()
@@ -16,11 +20,12 @@ export default async function ViewBotsPage() {
             schema.user,
             eq(schema.user.id, schema.botDetails.created_by_user_id)
         )
-        .where(eq(schema.botDetails.created_by_user_id, session?.user!!.id));
+        .where(eq(schema.botDetails.created_by_user_id, session?.user!!.id))
+        .orderBy(desc(schema.botDetails.created_at));
 
     return (
         <div>
-            <HeadingWithSideActionButton heading="Your bots!">
+            <HeadingWithSideActionButton heading="Your bots">
                 <Link href={"/dashboard/bots/create"}>
                     <Button
                         buttonText="Create new"

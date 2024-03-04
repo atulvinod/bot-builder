@@ -16,8 +16,10 @@ import { canvasPreview } from "./canvas-preview";
 import { CustomModal } from "../custom-modal/custom-modal";
 
 export const ImageInput = ({
+    isDisabled = false,
     handleSetImage,
 }: {
+    isDisabled?: boolean;
     handleSetImage: (f: File) => void;
 }) => {
     const fileInputRef: MutableRefObject<HTMLInputElement | null> =
@@ -33,6 +35,9 @@ export const ImageInput = ({
     const [aspect, setAspect] = useState(4 / 4);
 
     const handleClick = () => {
+        if (isDisabled) {
+            return;
+        }
         // 👇️ open file input box on click of another element
         if (fileInputRef.current) fileInputRef.current.click();
     };

@@ -21,12 +21,11 @@ export default function BotDescription({
     bot_description: string;
     status: botStatus;
 }) {
-    const router = useRouter();
     const botLink = `/dashboard/bots/${bot_id}`;
     return (
         <div
             className="rounded-lg bg-appGrey p-5  cursor-pointer"
-            onClick={() => router.push(botLink)}
+            onClick={() => window.open(botLink)}
         >
             <div className="h-full flex flex-col">
                 <div className="flex flex-row items-center">

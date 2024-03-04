@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
 import ChatPage from "./chat_page";
 import { getServerSession } from "next-auth";
+import { getUser } from "@/lib/auth";
 
 const CHAT_SERVICE_HOST = getChatServiceHost();
 
@@ -25,8 +26,9 @@ export default async function ChatPageRoot({
     let chatHistory: ChatMessage[] = [];
     let userSessionId: string | null = null;
     let suggestedQuestions: string[] = [];
-    const session = await getServerSession();
-    const authToken = `Bearer ${session?.user?.jwt}`;
+    const session = await getUser();
+    const authToken = `Bearer ${session?.jwt}`;
+
     const userSessionRequest = await fetch(
         `${CHAT_SERVICE_HOST}/bot/${params.bot_id}/session`,
         {
@@ -35,7 +37,6 @@ export default async function ChatPageRoot({
             },
         }
     );
-
     if (userSessionRequest.ok) {
         userSessionId = (await userSessionRequest.json()).data.session;
         const chatHistoryRequest = await fetch(
@@ -67,6 +68,7 @@ export default async function ChatPageRoot({
                     await suggestedQuestionsRequest.json()
                 ).data.questions;
                 suggestedQuestions = suggestedQuestionsBody;
+                console.log(suggestedQuestionsBody);
             }
         } else {
             throw new Error("Unexpected error occurred, Please try again");
