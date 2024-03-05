@@ -5,17 +5,9 @@ import {
     ButtonVariants,
 } from "@/app/shared/components/buttons";
 import { useRef, useState } from "react";
-import sendIcon from "../../../svgs/send.svg";
-import Image from "next/image";
 import { PulseLoader } from "react-spinners";
 import "animate.css";
-import sparking from "../../../svgs/sparkling.svg";
 import { SendHorizontal } from "lucide-react";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 
 export function ChatInput({
     onSubmit,

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import magicIcon from "../../../svgs/sparkling.svg";
+import magicIcon from "../../../../svgs/sparkling.svg";
 import "animate.css";
 
 export default function ChatBubble({

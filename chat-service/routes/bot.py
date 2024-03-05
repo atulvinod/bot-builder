@@ -36,8 +36,7 @@ def getHistory(user, bot_id:int):
     return {"data":{"history":response}}
 
 @routeBlueprint.route('/<bot_id>/suggested_questions')
-@authorize
-def getSuggested(user, bot_id:int):
+def getSuggested(bot_id:int):
     suggested = getSuggestedQuestions(bot_id)
     return {"data":{"questions":suggested}}
 

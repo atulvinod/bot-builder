@@ -2,38 +2,72 @@
 
 import { useEffect, useState } from "react";
 import { animateScroll } from "react-scroll";
-import ChatBubble from "./message_bubble";
+import ChatBubble from "./components/message_bubble";
 import { toast } from "sonner";
-import { ChatInput } from "./chat_input";
-import { ChatMessage, getChatServiceHost } from "@/app/shared/utils";
+import { ChatInput } from "./components/chat_input";
+import { ChatMessage } from "@/app/shared/utils";
 import * as schemas from "../../../schemas/schemas";
 
-import { ChatPageNav } from "./chat_page_navbar";
+import { ChatPageNav } from "./components/chat_page_navbar";
 import Loader from "@/app/shared/components/loader";
-
-const CHAT_SERVICE_HOST = getChatServiceHost();
+import { useSession } from "next-auth/react";
+import {
+    clearChatRequest,
+    getAnswerRequest,
+    getChatHistory,
+    getUserSession,
+} from "./components/_services";
 
 export default function ChatPage({
     bot_details,
-    chat_history,
-    session_id,
     suggested_questions,
-    auth_token,
     created_by_user,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
-    chat_history: (ChatMessage & { animate?: boolean })[];
-    session_id: string;
     suggested_questions: string[];
-    auth_token: string;
     created_by_user: typeof schemas.user.$inferSelect;
 }) {
-    const [history, setChatHistory] = useState(chat_history);
-    const [currentSessionId, setSessionId] = useState(session_id);
-    const [isLoading, setLoading] = useState(false);
+    const session = useSession();
+
+    const [isAuthenticated, setAuthenticated] = useState<boolean>(false);
+    const [history, setChatHistory] = useState<ChatMessage[]>([]);
+    const [currentSessionId, setSessionId] = useState<string | null>(null);
+    const [isChatReady, setChatReady] = useState(false);
+    const [currentJWT, setJWT] = useState<string | undefined>(undefined);
 
     const [enableInput, setInputEnabled] = useState(true);
     const [responseStream, setResponseStream] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function run() {
+            if (session.status == "authenticated") {
+                const token = `Bearer ${session.data.jwt}`;
+                const _user_session_id = await getUserSession(
+                    bot_details.id,
+                    token
+                );
+                const _history = await getChatHistory(
+                    bot_details.id,
+                    token,
+                    _user_session_id
+                );
+
+                setSessionId(_user_session_id);
+                setChatHistory(_history);
+                setJWT(token);
+                setAuthenticated(true);
+                setChatReady(true);
+            }
+        }
+        run();
+        return () => {
+            setSessionId(null);
+            setChatHistory([]);
+            setJWT(undefined);
+            setAuthenticated(false);
+            setChatReady(false);
+        };
+    }, [session, bot_details.id]);
 
     useEffect(() => {
         scrollToBottom();
@@ -60,20 +94,11 @@ export default function ChatPage({
         setChatHistory(new_history);
         const decoder = new TextDecoder("utf-8");
 
-        const response = await fetch(
-            `${CHAT_SERVICE_HOST}/bot/chat/${bot_details.id}/ask`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "text/event-stream",
-                    "Chat-Session-Id": currentSessionId,
-                    Authorization: auth_token,
-                },
-                body: JSON.stringify({
-                    question,
-                }),
-            }
+        const response = await getAnswerRequest(
+            bot_details.id,
+            currentJWT!!,
+            currentSessionId!!,
+            question
         );
         if (!response.ok) {
             toast.error("Something went wrong, please try again");
@@ -115,54 +140,35 @@ export default function ChatPage({
     }
 
     async function clearChat() {
-        setLoading(true);
+        setChatReady(true);
         try {
-            const newSessionRequest = await fetch(
-                `${CHAT_SERVICE_HOST}/bot/${bot_details.id}/session/reset`,
-                {
-                    headers: {
-                        Authorization: auth_token,
-                        "Chat-Session-Id": currentSessionId,
-                    },
-                }
+            const sessionId = await clearChatRequest(
+                bot_details.id,
+                currentJWT!!,
+                currentSessionId!!
             );
-            if (!newSessionRequest.ok) {
-                throw new Error("Failed to get new chat session");
-            }
-            const sessionRequestBody = await newSessionRequest.json();
-
-            setSessionId(sessionRequestBody.data.session);
+            setSessionId(sessionId);
             setChatHistory([]);
         } catch (ex) {
             toast.error("Unable to reset chat history, please try again later");
         } finally {
-            setLoading(false);
+            setChatReady(false);
         }
     }
 
     return (
         <div className="h-[100vh]">
-            {isLoading && (
-                <div className="flex flex-col h-full">
+            <div className="h-full flex flex-col ">
+                <div className="overflow-y-scroll mb-5 flex-auto" id="messages">
                     <ChatPageNav
+                        is_authenticated={isAuthenticated}
                         bot_details={bot_details}
                         created_by_user_details={created_by_user}
-                        on_clear_chat={() => {}}
+                        on_clear_chat={clearChat}
                     />
-                    <Loader />
-                </div>
-            )}
-            {!isLoading && (
-                <div className="h-full flex flex-col ">
-                    <div
-                        className="overflow-y-scroll mb-5 flex-auto"
-                        id="messages"
-                    >
-                        <ChatPageNav
-                            bot_details={bot_details}
-                            created_by_user_details={created_by_user}
-                            on_clear_chat={clearChat}
-                        />
+                    {!isChatReady ? (
+                        <Loader />
+                    ) : (
                         <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
                             <div
                                 className="flex-auto  flex flex-col mb-4"
@@ -206,15 +212,15 @@ export default function ChatPage({
                                 </div>
                             )}
                         </div>
-                    </div>
-                    <div className="px-96 lg:px-56 pb-20">
-                        <ChatInput
-                            isInputEnabled={enableInput}
-                            onSubmit={(question) => getAnswer(question)}
-                        />
-                    </div>
+                    )}
                 </div>
-            )}
+                <div className="px-96 lg:px-56 pb-20">
+                    <ChatInput
+                        isInputEnabled={isChatReady && enableInput}
+                        onSubmit={(question) => getAnswer(question)}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

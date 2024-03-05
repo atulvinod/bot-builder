@@ -3,7 +3,6 @@ import { config } from "dotenv";
 import { TrainingAssetTypes } from "../../lib/constants";
 import {
     FileTrainingData,
-    FileTrainingDataSchema,
 } from "./components/file_training_data_input";
 export class TrainingFilesInputConfig
     implements TrainingDataInputsSchema<File[]>
@@ -112,7 +111,9 @@ export function loadEnv() {
 export interface ChatMessage {
     role: "user" | "assistant";
     content: string;
+    animate?: boolean;
 }
+
 
 export function getChatServiceHost() {
     return `http://${process.env.NEXT_PUBLIC_CHAT_SERVICE_API}`;
