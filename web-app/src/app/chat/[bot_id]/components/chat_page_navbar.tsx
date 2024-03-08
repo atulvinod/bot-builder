@@ -7,19 +7,9 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ShieldAlert, MessageSquare } from "lucide-react";
 import AvatarImage from "@/app/shared/components/avatar_image";
 import { Button, ButtonVariants } from "@/app/shared/components/buttons";
 import infoIcon from "../../../../svgs/info.svg";
-import moreIcon from "../../../../svgs/more.svg";
 import Image from "next/image";
 
 export function ChatPageNav({
@@ -27,11 +17,19 @@ export function ChatPageNav({
     created_by_user_details,
     is_authenticated,
     on_clear_chat,
+    current_user,
 }: {
     bot_details: typeof schemas.botDetails.$inferSelect;
     created_by_user_details: typeof schemas.user.$inferSelect;
     on_clear_chat: () => void;
     is_authenticated: boolean;
+    current_user?:
+        | {
+              name?: string | null | undefined;
+              image?: string | null | undefined;
+          }
+        | null
+        | undefined;
 }) {
     return (
         <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5 fixed bg-white">
@@ -80,39 +78,11 @@ export function ChatPageNav({
                                 </div>
                             </DialogContent>
                         </Dialog>
-                    </div>
-                    <div className="ml-2 flex items-center">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger>
-                                <NavButtonsContainer onClick={() => {}}>
-                                    <Image
-                                        alt="more-icon"
-                                        src={moreIcon}
-                                        width={20}
-                                        height={20}
-                                    />
-                                </NavButtonsContainer>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuLabel>Menu</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-
-                                <DropdownMenuItem>
-                                    <span>
-                                        <MessageSquare className="mr-2" />
-                                    </span>
-                                    <span>Feedback for bot</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <span>
-                                        <ShieldAlert className="mr-2 text-red-400" />
-                                    </span>
-                                    <span className="text-red-500">
-                                        Report a problem
-                                    </span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="ml-3">
+                            {current_user && (
+                                <AvatarImage path={current_user.image} />
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

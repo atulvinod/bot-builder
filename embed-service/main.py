@@ -8,9 +8,7 @@ from app_queue import AppQueue
 from dotenv import load_dotenv
 
 
-env = os.getenv("ENV")
-if env is None or env == "dev":
-    load_dotenv()
+load_dotenv()
 
 logging.basicConfig(
      level=logging.DEBUG,

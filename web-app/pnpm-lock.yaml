@@ -113,6 +113,9 @@ dependencies:
   react-dom:
     specifier: ^18
     version: 18.2.0(react@18.2.0)
+  react-google-button:
+    specifier: ^0.7.2
+    version: 0.7.2(react@18.2.0)
   react-hook-form:
     specifier: ^7.50.1
     version: 7.50.1(react@18.2.0)
@@ -5806,6 +5809,15 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
+
+  /react-google-button@0.7.2(react@18.2.0):
+    resolution: {integrity: sha512-LPIqU2hIlc212kqks8MtKjRstquVkP3SIjxlK5B1nIfg2R7YqSusJAxZUkJA5dv/z6QeSuGyI9ujwV/VWMTyAA==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.2.0
     dev: false
 
   /react-hook-form@7.50.1(react@18.2.0):

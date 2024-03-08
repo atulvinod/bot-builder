@@ -5,8 +5,14 @@ services:
             context: ./embed-service
         ports:
             - 8000:8000
+        environment:
+            - DB_HOST=database
+            - REDIS_HOST=redis
     chat-service:
         build:
             context: ./chat-service
         ports:
             - 5000:8000
+        environment:
+            - DB_HOST=database
+            - REDIS_HOST=redis

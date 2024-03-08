@@ -18,6 +18,17 @@ import {
     getUserSession,
 } from "./components/_services";
 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import AvatarImage from "@/app/shared/components/avatar_image";
+import GoogleButton from "react-google-button";
+import { signIn } from "next-auth/react";
+
 export default function ChatPage({
     bot_details,
     suggested_questions,
@@ -29,7 +40,7 @@ export default function ChatPage({
 }) {
     const session = useSession();
 
-    const [isAuthenticated, setAuthenticated] = useState<boolean>(false);
+    const [isAuthenticated, setAuthenticated] = useState<boolean>(true);
     const [history, setChatHistory] = useState<ChatMessage[]>([]);
     const [currentSessionId, setSessionId] = useState<string | null>(null);
     const [isChatReady, setChatReady] = useState(false);
@@ -57,6 +68,12 @@ export default function ChatPage({
                 setJWT(token);
                 setAuthenticated(true);
                 setChatReady(true);
+            } else if (session.status == "loading") {
+                setChatReady(false);
+                setAuthenticated(true);
+            } else if (session.status == "unauthenticated") {
+                setChatReady(false);
+                setAuthenticated(false);
             }
         }
         run();
@@ -64,7 +81,6 @@ export default function ChatPage({
             setSessionId(null);
             setChatHistory([]);
             setJWT(undefined);
-            setAuthenticated(false);
             setChatReady(false);
         };
     }, [session, bot_details.id]);
@@ -157,70 +173,108 @@ export default function ChatPage({
     }
 
     return (
-        <div className="h-[100vh]">
-            <div className="h-full flex flex-col ">
-                <div className="overflow-y-scroll mb-5 flex-auto" id="messages">
-                    <ChatPageNav
-                        is_authenticated={isAuthenticated}
-                        bot_details={bot_details}
-                        created_by_user_details={created_by_user}
-                        on_clear_chat={clearChat}
-                    />
-                    {!isChatReady ? (
-                        <Loader />
-                    ) : (
-                        <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
-                            <div
-                                className="flex-auto  flex flex-col mb-4"
-                                id="messages"
-                            >
-                                {history.map((h, i) => {
-                                    return (
+        <>
+            <div className="h-[100vh]">
+                <div className="h-full flex flex-col ">
+                    <div
+                        className="overflow-y-scroll mb-5 flex-auto"
+                        id="messages"
+                    >
+                        <ChatPageNav
+                            is_authenticated={isAuthenticated}
+                            bot_details={bot_details}
+                            created_by_user_details={created_by_user}
+                            on_clear_chat={clearChat}
+                            current_user={
+                                isAuthenticated && isChatReady
+                                    ? session.data?.user
+                                    : null
+                            }
+                        />
+                        {!isChatReady ? (
+                            <Loader />
+                        ) : (
+                            <div className="w-full h-full flex flex-col px-96 lg:px-56 pb-5 pt-24">
+                                <div
+                                    className="flex-auto  flex flex-col mb-4"
+                                    id="messages"
+                                >
+                                    {history.map((h, i) => {
+                                        return (
+                                            <ChatBubble
+                                                role={h.role}
+                                                key={i}
+                                                animate={h.animate ?? false}
+                                            >
+                                                <span>{h.content}</span>
+                                            </ChatBubble>
+                                        );
+                                    })}
+                                    {responseStream && (
                                         <ChatBubble
-                                            role={h.role}
-                                            key={i}
-                                            animate={h.animate ?? false}
+                                            role={"assistant"}
+                                            animate={true}
                                         >
-                                            <span>{h.content}</span>
+                                            <span>{responseStream}</span>
                                         </ChatBubble>
-                                    );
-                                })}
-                                {responseStream && (
-                                    <ChatBubble
-                                        role={"assistant"}
-                                        animate={true}
-                                    >
-                                        <span>{responseStream}</span>
-                                    </ChatBubble>
+                                    )}
+                                </div>
+                                {history.length == 0 && (
+                                    <div>
+                                        {suggested_questions.map((q, i) => (
+                                            <ChatBubble
+                                                role={"user"}
+                                                isMagic={true}
+                                                key={i}
+                                                animate={true}
+                                                onClick={() => {
+                                                    getAnswer(q);
+                                                }}
+                                            >
+                                                <span>{q}</span>
+                                            </ChatBubble>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
-                            {history.length == 0 && (
-                                <div>
-                                    {suggested_questions.map((q, i) => (
-                                        <ChatBubble
-                                            role={"user"}
-                                            isMagic={true}
-                                            key={i}
-                                            animate={true}
-                                            onClick={() => {
-                                                getAnswer(q);
-                                            }}
-                                        >
-                                            <span>{q}</span>
-                                        </ChatBubble>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-                <div className="px-96 lg:px-56 pb-20">
-                    <ChatInput
-                        isInputEnabled={isChatReady && enableInput}
-                        onSubmit={(question) => getAnswer(question)}
-                    />
+                        )}
+                    </div>
+                    <div className="px-96 lg:px-56 pb-20">
+                        <ChatInput
+                            isInputEnabled={isChatReady && enableInput}
+                            onSubmit={(question) => getAnswer(question)}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+            <Dialog open={!isAuthenticated}>
+                <DialogContent className="sm:max-w-[425px] h-" hideClose={true}>
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl text-center">
+                            Sign-In
+                        </DialogTitle>
+                        <DialogDescription className="mt-5 text-black text-md text-center">
+                            To use this bot, you need to sign-in.
+                        </DialogDescription>
+                        <div className="flex flex-col items-center py-5">
+                            <AvatarImage
+                                path={bot_details.avatar_image}
+                                heightWidthClasses="h-24 w-24"
+                            />
+                            <span className="mt-3 text-xl">
+                                {bot_details.name}
+                            </span>
+                            <GoogleButton
+                                className="mt-5"
+                                onClick={() => {
+                                    signIn("google");
+                                }}
+                            />
+                        </div>
+                    </DialogHeader>
+                    <div></div>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }

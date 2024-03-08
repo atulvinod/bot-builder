@@ -2,11 +2,7 @@ import os
 import logging
 from dotenv import load_dotenv
 
-env = os.getenv('ENV') 
-logging.info(f"App environment {env}")
-if env is None or  env == "dev":
-    logging.info(f"App environment not found, loading from .env")
-    load_dotenv()
+load_dotenv()
 
     
 from lib.utils.pinecone_client import PineconeClient
