@@ -18,7 +18,7 @@ import {
     TrainingData,
     TrainingFilesConfig,
 } from "@/app/shared/components/interfaces";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import {
@@ -27,6 +27,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function BotDetailsPage({
     params,
@@ -42,7 +44,6 @@ export default function BotDetailsPage({
     };
 
     const router = useRouter();
-
 
     const { data: botDetails, isLoading } = useQuery({
         queryKey: ["bot_details"],
@@ -102,7 +103,8 @@ export default function BotDetailsPage({
                                     Description
                                 </label>
                                 <Textarea
-                                    className="mt-1.5 "
+                                    rows={1}
+                                    className="mt-1.5  text-black resize-none h-fit"
                                     value={botDetails?.description}
                                     disabled
                                 />
@@ -119,7 +121,7 @@ export default function BotDetailsPage({
                                 <label className="text-lg font-medium">
                                     Training Data
                                 </label>
-                                <div className="w-[60%] mt-1.5">
+                                <div className="mt-1.5">
                                     {(
                                         botDetails?.spec!! as {
                                             training_spec: TrainingData[];
@@ -154,29 +156,72 @@ function FileTrainingDataDescription({
 }: {
     data: TrainingFilesConfig[];
 }) {
+    const [showFiles, setShowFiles] = useState(false);
+
     return (
         <div className="p-4 bg-appGrey rounded-lg">
             <div>
-                <span className="text-2xl font-medium">Files</span>
-                {data.map((d, idx1) => (
-                    <div className="border-2 mt-2 p-2" key={idx1}>
-                        <span className="underline text-lg">Context</span>
-                        <Textarea
-                            value={d.context}
-                            disabled
-                            className="text-black mt-1"
-                        />
-
-                        <div className="mt-1">
-                            <span className="underline text-lg">Files</span>
-                            {d.files?.map((f, idx2) => (
-                                <div key={idx2} className="mt-1.5">
-                                    <span className="text-sm">{f.name}</span>
-                                </div>
-                            ))}
-                        </div>
+                <div className="flex justify-between">
+                    <span className="text-2xl font-medium">Files</span>
+                    <Button
+                        onClick={() => setShowFiles(!showFiles)}
+                        variant={"ghost"}
+                    >
+                        {showFiles ? <ChevronUp /> : <ChevronDown />}
+                    </Button>
+                </div>
+                {showFiles && (
+                    <div>
+                        {" "}
+                        {data.map((d, idx1) => (
+                            <TrainingFilesView data={d} key={idx1} />
+                        ))}
                     </div>
-                ))}
+                )}
+            </div>
+        </div>
+    );
+}
+
+function TrainingFilesView({ data }: { data: TrainingFilesConfig }) {
+    const [showFiles, setShowFiles] = useState(false);
+    return (
+        <div className="border-2 mt-2 p-2">
+            <span className="underline text-xl">Context</span>
+            <p className="mt-1">{data.context}</p>
+
+            <div className="mt-2">
+                <div className="flex justify-between">
+                    <span className="underline text-xl ">
+                        Files ({data.files?.length}){" "}
+                    </span>
+                    <Button
+                        onClick={() => setShowFiles(!showFiles)}
+                        variant={"ghost"}
+                    >
+                        {showFiles ? <ChevronUp /> : <ChevronDown />}
+                    </Button>
+                </div>
+
+                {showFiles && (
+                    <div className="px-2">
+                        <ul className="list-disc ml-5">
+                            {data.files?.map((f, idx2) => (
+                                <li key={idx2} className="mt-1.5">
+                                    <span className="text-sm break-words">
+                                        {f.name}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                        <Button
+                            onClick={() => setShowFiles(!showFiles)}
+                            variant={"ghost"}
+                        >
+                            {showFiles ? <ChevronUp /> : <ChevronDown />}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

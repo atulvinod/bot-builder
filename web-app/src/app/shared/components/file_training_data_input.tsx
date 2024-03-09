@@ -12,6 +12,8 @@ import {
     PlusIcon,
     Trash2,
     FolderUp,
+    ChevronUp,
+    ChevronDown,
 } from "lucide-react";
 import {
     Dialog,
@@ -188,6 +190,7 @@ function TrainingDataSegmentComponent({
     const [files, setFiles] = useState<File[]>(state.value.files);
     const [context, setContext] = useState<string>(state.value.context);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showInputFiles, setShowInputFiles] = useState(false);
 
     function updateFiles(event: ChangeEvent<HTMLInputElement>) {
         if (event.target.files) {
@@ -228,47 +231,73 @@ function TrainingDataSegmentComponent({
                         onChange={updateFiles}
                     />
                     <div className="flex justify-between">
-                        <h1 className="text-xl">Documents</h1>
-                    </div>
-                    <div>
-                        {files.map((f, idx) => (
-                            <div
-                                key={idx}
-                                className=" rounded border-gray-500  border-1 flex items-center mt-0 ml-1 break-words"
+                        <div className="flex items-center">
+                            <h1 className="text-xl">
+                                Documents ({files.length})
+                            </h1>
+                            <Button
+                                variant={"outline"}
+                                type="button"
+                                className="p-2 mt-1 ml-4"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
-                                <span className="text-sm">{f.name}</span>
-                                <span className="ml-2">
-                                    <Button
-                                        variant={"ghost"}
-                                        className="p-0 transparent h-8"
-                                        onClick={() => {
-                                            files.splice(idx, 1);
-                                            const newFiles = [...files];
-                                            notifyChange(context, newFiles);
-                                        }}
-                                    >
-                                        <X size={12} className="" />
-                                    </Button>
-                                </span>
-                            </div>
-                        ))}
+                                <FolderOpen className="w-4 h-4 mr-2" />
+                                Add files
+                            </Button>
+                        </div>
+
                         <Button
-                            variant={"outline"}
-                            type="button"
-                            className="p-2 mt-1"
-                            onClick={() => {
-                                if (fileInputRef.current) {
-                                    fileInputRef.current.click();
-                                }
-                            }}
+                            onClick={() => setShowInputFiles(!showInputFiles)}
+                            variant={"ghost"}
                         >
-                            <FolderOpen className="w-4 h-4 mr-2" />
-                            Add files
+                            {showInputFiles ? <ChevronUp /> : <ChevronDown />}
                         </Button>
                     </div>
+                    {showInputFiles && (
+                        <div>
+                            {files.map((f, idx) => (
+                                <div
+                                    key={idx}
+                                    className=" rounded border-gray-500  border-1 flex items-center mt-0 ml-1 break-words"
+                                >
+                                    <span className="text-sm">{f.name}</span>
+                                    <span className="ml-2">
+                                        <Button
+                                            variant={"ghost"}
+                                            className="p-0 transparent h-8"
+                                            onClick={() => {
+                                                files.splice(idx, 1);
+                                                const newFiles = [...files];
+                                                notifyChange(context, newFiles);
+                                            }}
+                                        >
+                                            <X size={12} className="" />
+                                        </Button>
+                                    </span>
+                                </div>
+                            ))}
+                            <Button
+                                variant={"outline"}
+                                type="button"
+                                className="p-2 mt-1"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
+                            >
+                                <FolderOpen className="w-4 h-4 mr-2" />
+                                Add files
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
-            <div>
+            <div className="flex flex-col justify-center bg-slate-200 rounded-tr-xl rounded-br-xl">
                 <Button variant={"ghost"} size={"icon"} onClick={onDelete}>
                     <Trash2 className="w-4 h-4" />
                 </Button>

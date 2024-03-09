@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animateScroll } from "react-scroll";
 import ChatBubble from "./components/message_bubble";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ import {
 import AvatarImage from "@/app/shared/components/avatar_image";
 import GoogleButton from "react-google-button";
 import { signIn } from "next-auth/react";
+import { fillPlaceholders } from "drizzle-orm";
 
 export default function ChatPage({
     bot_details,
@@ -39,7 +40,6 @@ export default function ChatPage({
     created_by_user: typeof schemas.user.$inferSelect;
 }) {
     const session = useSession();
-
     const [isAuthenticated, setAuthenticated] = useState<boolean>(true);
     const [history, setChatHistory] = useState<ChatMessage[]>([]);
     const [currentSessionId, setSessionId] = useState<string | null>(null);
@@ -48,6 +48,8 @@ export default function ChatPage({
 
     const [enableInput, setInputEnabled] = useState(true);
     const [responseStream, setResponseStream] = useState<string | null>(null);
+    const [responseErrored, setIsResponseErrored] = useState<boolean>(false);
+    const lastQuestionAsked = useRef<string | null>(null);
 
     useEffect(() => {
         async function run() {
@@ -68,7 +70,7 @@ export default function ChatPage({
                 setJWT(token);
                 setAuthenticated(true);
                 setChatReady(true);
-            } else if (session.status == "loading") {
+            } else if (session.status == "loading" && !currentSessionId) {
                 setChatReady(false);
                 setAuthenticated(true);
             } else if (session.status == "unauthenticated") {
@@ -97,8 +99,17 @@ export default function ChatPage({
     }
 
     async function getAnswer(question: string) {
+        lastQuestionAsked.current = question;
         setInputEnabled(false);
         let new_history = [...history];
+
+        /**
+         * If last response has errored, then remove the last user response and re-add the message
+         */
+        if (responseErrored) {
+            new_history.pop();
+            setIsResponseErrored(false);
+        }
         /**
          * Animate the fade in when the user has added the new message
          */
@@ -117,6 +128,7 @@ export default function ChatPage({
             question
         );
         if (!response.ok) {
+            setIsResponseErrored(true);
             toast.error("Something went wrong, please try again");
             return;
         }
@@ -124,30 +136,38 @@ export default function ChatPage({
         if (response.body && typeof response.body.getReader == "function") {
             const reader = response.body.getReader();
             let responseStreamData = "";
+            
             const read = () => {
                 reader.read().then(({ done, value }) => {
                     if (done) {
                         /**
-                         * Don't animate the fade in when re-rendering history
+                         * Don't animate the fade in when re-rendering history, consider error if the response was only white test
                          */
-                        new_history = [
-                            ...new_history.map((h) => ({
-                                ...h,
-                                animate: false,
-                            })),
-                            {
-                                role: "assistant",
-                                content: responseStreamData,
-                            },
-                        ];
+                        if (responseStreamData.trim().length) {
+                            new_history = [
+                                ...new_history.map((h) => ({
+                                    ...h,
+                                    animate: false,
+                                })),
+                                {
+                                    role: "assistant",
+                                    content: responseStreamData,
+                                },
+                            ];
+                            setChatHistory(new_history);
+                        } else {
+                            toast.error("Something went wrong, please try again");
+                            setIsResponseErrored(true);
+                        }
                         setInputEnabled(true);
                         setResponseStream(null);
-                        setChatHistory(new_history);
                         return;
                     }
                     let textChunk = decoder.decode(value);
                     responseStreamData += textChunk;
-                    setResponseStream(responseStreamData);
+                    if (responseStreamData.trim().length) {
+                        setResponseStream(responseStreamData);
+                    }
                     read();
                 });
             };
@@ -156,7 +176,7 @@ export default function ChatPage({
     }
 
     async function clearChat() {
-        setChatReady(true);
+        setChatReady(false);
         try {
             const sessionId = await clearChatRequest(
                 bot_details.id,
@@ -168,7 +188,7 @@ export default function ChatPage({
         } catch (ex) {
             toast.error("Unable to reset chat history, please try again later");
         } finally {
-            setChatReady(false);
+            setChatReady(true);
         }
     }
 
@@ -199,6 +219,20 @@ export default function ChatPage({
                                     className="flex-auto  flex flex-col mb-4"
                                     id="messages"
                                 >
+                                    {isAuthenticated && (
+                                        <ChatBubble role="assistant">
+                                            <div>
+                                                <p className="text-2xl">
+                                                    Hello{" "}
+                                                    {session.data?.user?.name} !
+                                                </p>
+                                                <p className="mt-1">
+                                                    I am {bot_details.name},{" "}
+                                                    {bot_details.description}
+                                                </p>
+                                            </div>
+                                        </ChatBubble>
+                                    )}
                                     {history.map((h, i) => {
                                         return (
                                             <ChatBubble
@@ -210,16 +244,32 @@ export default function ChatPage({
                                             </ChatBubble>
                                         );
                                     })}
-                                    {responseStream && (
+                                    {responseErrored && (
                                         <ChatBubble
-                                            role={"assistant"}
-                                            animate={true}
+                                            role="user"
+                                            isError={true}
+                                            onClick={() =>
+                                                getAnswer(
+                                                    lastQuestionAsked.current!!
+                                                )
+                                            }
                                         >
-                                            <span>{responseStream}</span>
+                                            <span>
+                                                {lastQuestionAsked.current}
+                                            </span>
                                         </ChatBubble>
                                     )}
+                                    {responseStream &&
+                                        responseStream.trim().length && (
+                                            <ChatBubble
+                                                role={"assistant"}
+                                                animate={true}
+                                            >
+                                                <span>{responseStream}</span>
+                                            </ChatBubble>
+                                        )}
                                 </div>
-                                {history.length == 0 && (
+                                {!history.length && (
                                     <div>
                                         {suggested_questions.map((q, i) => (
                                             <ChatBubble

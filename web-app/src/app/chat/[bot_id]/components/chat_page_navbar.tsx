@@ -11,6 +11,8 @@ import AvatarImage from "@/app/shared/components/avatar_image";
 import { Button, ButtonVariants } from "@/app/shared/components/buttons";
 import infoIcon from "../../../../svgs/info.svg";
 import Image from "next/image";
+import ConfirmDialogBox from "@/app/shared/components/confirmation_dialog";
+import { useState } from "react";
 
 export function ChatPageNav({
     bot_details,
@@ -31,6 +33,7 @@ export function ChatPageNav({
         | null
         | undefined;
 }) {
+    const [isClearChatDialogOpen, setClearChatDialogOpen] = useState(false);
     return (
         <nav className="h-20 w-full border-b border-slate-200 border-solid flex items-center justify-between px-5 fixed bg-white">
             <div className="flex flex-row items-center">
@@ -40,11 +43,18 @@ export function ChatPageNav({
             {is_authenticated && (
                 <div className="flex flex-row items-center">
                     <div>
-                        <Button
-                            buttonText={"Clear Chat"}
-                            variant={ButtonVariants.Muted}
-                            onClick={on_clear_chat}
-                        />
+                        <ConfirmDialogBox
+                            set_dialog_open={setClearChatDialogOpen}
+                            is_dialog_open={isClearChatDialogOpen}
+                            on_confirm={on_clear_chat}
+                            text="Are you sure you want to delete chat? History will be lost"
+                            title="Clear chat?"
+                        >
+                            <Button
+                                buttonText={"Clear Chat"}
+                                variant={ButtonVariants.Muted}
+                            />
+                        </ConfirmDialogBox>
                     </div>
 
                     <div className="ml-2 flex items-center">

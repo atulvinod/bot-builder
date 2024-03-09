@@ -30,7 +30,6 @@ export default async function ChatPageLayout({
             cache: "no-store",
         }
     );
-
     if (suggestedQuestionsRequest.ok) {
         const suggestedQuestionsBody = await suggestedQuestionsRequest.json();
         suggestedQuestions.push(...suggestedQuestionsBody.data.questions);

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import magicIcon from "../../../../svgs/sparkling.svg";
 import "animate.css";
+import clsx from "clsx";
+import { RefreshCcw } from "lucide-react";
 
 export default function ChatBubble({
     role: type,
@@ -8,38 +10,30 @@ export default function ChatBubble({
     children,
     onClick = () => {},
     animate = false,
+    isError = false,
 }: {
     role: "user" | "assistant";
     isMagic?: boolean;
+    isError?: boolean;
     children: React.ReactElement;
     onClick?: () => void;
     animate?: boolean;
 }) {
-    function getStyle() {
-        let base = "rounded-3xl  px-5 py-3 w-fit";
-        let rounding = type == "user" ? "rounded-br-none " : "rounded-bl-none";
-        let bgColor = isMagic
-            ? "bg-appLightBlue cursor-pointer"
-            : type == "user"
-            ? "bg-appParrot"
-            : "bg-appTeal";
-
-        return `${base} ${rounding} ${bgColor}`;
-    }
     return (
         <div
-            className={`flex flex-row items-center mt-5 ${
-                animate ? "animate__animated animate__fadeInUp" : ""
-            } ${type == "user" ? "justify-end" : "justify-start"}`}
+            className={clsx(
+                "flex flex-row items-center mt-5",
+                animate && "animate__animated animate__fadeInUp",
+                type == "user" ? "justify-end" : "justify-start"
+            )}
         >
             <div
                 onClick={onClick}
-                className={
-                    `max-w-[55%] flex flex-row items-center` +
-                    (isMagic
-                        ? "transition-transform duration-300 transform hover:translate-y-[-5px]"
-                        : "")
-                }
+                className={clsx(
+                    `max-w-[55%] flex flex-row items-center`,
+                    isMagic &&
+                        "transition-transform duration-300 transform hover:translate-y-[-5px]"
+                )}
             >
                 {isMagic && (
                     <Image
@@ -50,7 +44,26 @@ export default function ChatBubble({
                         className="mr-3"
                     />
                 )}
-                <div className={getStyle()}>{children}</div>
+                {isError && type == "user" && (
+                    <RefreshCcw
+                        className="mr-3 cursor-pointer"
+                        onClick={onClick}
+                    />
+                )}
+                <div
+                    className={clsx(
+                        "rounded-3xl  px-5 py-3 w-fit",
+                        type == "user" ? "rounded-br-none " : "rounded-bl-none",
+                        isMagic && "bg-appLightBlue ",
+                        !isMagic && type == "user"
+                            ? "bg-appParrot"
+                            : "bg-appTeal",
+                        isError && type == "user" && "bg-red-500",
+                        (isError || isMagic) && "cursor-pointer"
+                    )}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );
