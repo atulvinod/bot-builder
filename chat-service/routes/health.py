@@ -5,6 +5,6 @@ from lib.services import health_service
 routeBlueprint = Blueprint("health", __name__, url_prefix="/health")
 
 
-@routeBlueprint.route("/")
+@routeBlueprint.route("")
 def healthCheck():
     return health_service.healthCheck()

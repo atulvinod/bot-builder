@@ -3,7 +3,7 @@ from app import redis
 
 
 def healthCheck():
-    result = {db: None, redis: None}
+    result = {"db": None, "redis": None}
 
     try:
         db.one("SELECT 1 + 1 as check")
@@ -12,7 +12,7 @@ def healthCheck():
         result["db"] = "Error"
 
     try:
-        redis_result = redis.ping()
+        redis.ping()
         result["redis"] = "Working"
     except:
         result["redis"] = "Error"
