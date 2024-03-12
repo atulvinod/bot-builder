@@ -22,59 +22,34 @@ jobs:
               with:
                 username: ${{secrets.DOCKER_USERNAME}}
                 password: ${{secrets.DOCKER_PASSWORD}}
-
-            - name: Build Embedding Service
+            
+            - name: Build environment files
+              env:
+                CHAT_SERVICE_ENV: ${{secrets.CHAT_SERVICE_ENV}}
+                EMBED_SERVICE_ENV: ${{secrets.EMBED_SERVICE_ENV}}
+                FIREBASE_SERVICE_CONFIG: ${{secrets.FIREBASE_SERVICE_CONFIG}}
+              run: |
+                touch ./chat-service/.env
+                touch ./embed-service/.env
+                touch ./embed-service/firebase_service_account_config.json
+                echo $CHAT_SERVICE_ENV | base64 --decode > ./chat-service/.env
+                echo $EMBED_SERVICE_ENV | base64 --decode > ./embed-service/.env
+                echo $FIREBASE_SERVICE_CONFIG | base64 --decode ./embed-service/firebase_service_account_config.json
+              
+            
+            - name: Docker Build Embedding Service
               uses: docker/build-push-action@v2
               with:
                 context: './embed-service'
                 file: 'Dockerfile'
                 push: true
                 tags: 'atulvinod1911/bot-builder-embed-service:${{github.ref}}'
-                build-args: |
-                    NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB=${{secrets.NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB}}
-                    DB_HOST=${{secrets.DB_HOST}}
-                    DB_USER=${{secrets.DB_USER}}
-                    DB_PASSWORD=${{secrets.DB_PASSWORD}}
-                    DB_DATABASE=${{secrets.DB_DATABASE}}
-                    DB_PORT=${{secrets.DB_PORT}}
-                    OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}
-                    REDIS_HOST=${{secrets.REDIS_HOST}}
-                    REDIS_PORT=${{secrets.REDIS_PORT}}
-                    REDIS_USER=${{secrets.REDIS_USER}}
-                    REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}}
-                    FIREBASE_API_KEY=${{secrets.FIREBASE_API_KEY}}
-                    FIREBASE_AUTH_DOMAIN=${{secrets.FIREBASE_AUTH_DOMAIN}}
-                    FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}}
-                    FIREBASE_STORAGE_BUCKET=${{secrets.FIREBASE_STORAGE_BUCKET}}
-                    FIREBASE_MESSAGE_SENDER_ID=${{secrets.FIREBASE_MESSAGE_SENDER_ID}}
-                    FIREBASE_APP_ID=${{secrets.FIREBASE_APP_ID}}
-                    PINECONE_API_KEY=${{secrets.PINECONE_API_KEY}}
 
-
-            - name: Build Chat Service
+            - name: Docker Build Chat Service
               uses: docker/build-push-action@v2
               with:
                 context: './chat-service'
                 file: 'Dockerfile'
                 push: true
                 tags: 'atulvinod1911/bot-builder-chat-service:${{github.ref}}'
-                build-args: |
-                    NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB=${{secrets.NEXT_PUBLIC_MAX_FILES_SIZE_LIMIT_MB}}
-                    DB_HOST=${{secrets.DB_HOST}}
-                    DB_USER=${{secrets.DB_USER}}
-                    DB_PASSWORD=${{secrets.DB_PASSWORD}}
-                    DB_DATABASE=${{secrets.DB_DATABASE}}
-                    DB_PORT=${{secrets.DB_PORT}}
-                    OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}
-                    REDIS_HOST=${{secrets.REDIS_HOST}}
-                    REDIS_PORT=${{secrets.REDIS_PORT}}
-                    REDIS_USER=${{secrets.REDIS_USER}}
-                    REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}}
-                    FIREBASE_API_KEY=${{secrets.FIREBASE_API_KEY}}
-                    FIREBASE_AUTH_DOMAIN=${{secrets.FIREBASE_AUTH_DOMAIN}}
-                    FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}}
-                    FIREBASE_STORAGE_BUCKET=${{secrets.FIREBASE_STORAGE_BUCKET}}
-                    FIREBASE_MESSAGE_SENDER_ID=${{secrets.FIREBASE_MESSAGE_SENDER_ID}}
-                    FIREBASE_APP_ID=${{secrets.FIREBASE_APP_ID}}
-                    PINECONE_API_KEY=${{secrets.PINECONE_API_KEY}}
 
