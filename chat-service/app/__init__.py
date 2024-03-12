@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-    
+
 from lib.utils.pinecone_client import PineconeClient
 from lib.utils.redis_client import RedisClient
 from lib.utils.db_client import DB
@@ -15,7 +15,8 @@ redis = RedisClient().getClient()
 
 from flask import Flask
 from flask_cors import CORS
-from routes.bot import routeBlueprint
+from routes.bot import routeBlueprint as botRoutes
+from routes.health import routeBlueprint as healthRoutes
 
 def create_app(test_config=None): 
     app = Flask(__name__, instance_relative_config=True)
@@ -33,6 +34,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    app.register_blueprint(routeBlueprint)
+    app.register_blueprint(botRoutes)
+    app.register_blueprint(healthRoutes)
     CORS(app)
     return app
