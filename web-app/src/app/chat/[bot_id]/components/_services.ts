@@ -3,7 +3,6 @@ import { getChatServiceHost } from "@/app/shared/utils";
 import { StatusCodes } from "http-status-codes";
 import { ChatMessage } from "@/app/shared/utils";
 
-const CHAT_SERVICE_HOST = getChatServiceHost();
 const CHAT_SESSION_HEADER_NAME = "Chat-Session-Id";
 
 export async function clearChatRequest(
@@ -12,7 +11,7 @@ export async function clearChatRequest(
     session_id: string
 ) {
     const newSessionRequest = await fetch(
-        `${CHAT_SERVICE_HOST}/bot/${bot_id}/session/reset`,
+        `/api/chat/bot/${bot_id}/session/reset`,
         {
             headers: {
                 Authorization: token,
@@ -33,21 +32,18 @@ export async function getAnswerRequest(
     session_id: string,
     question: string
 ) {
-    const response = await fetch(
-        `${CHAT_SERVICE_HOST}/bot/chat/${bot_id}/ask`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "text/event-stream",
-                [CHAT_SESSION_HEADER_NAME]: session_id,
-                Authorization: token,
-            },
-            body: JSON.stringify({
-                question,
-            }),
-        }
-    );
+    const response = await fetch(`/api/chat/bot/chat/${bot_id}/ask`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+            [CHAT_SESSION_HEADER_NAME]: session_id,
+            Authorization: token,
+        },
+        body: JSON.stringify({
+            question,
+        }),
+    });
     return response;
 }
 
