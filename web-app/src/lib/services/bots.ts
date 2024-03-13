@@ -130,7 +130,6 @@ export async function pushToTaskQueue(bot_id: number) {
         const redis_client = await getRedisClient();
         const payload = JSON.stringify({ bot_id });
         console.log(payload);
-        return;
         await redis_client.lPush("task", payload);
     } catch (e) {
         await db_client

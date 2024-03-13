@@ -7,6 +7,9 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { unstable_noStore } from "next/cache";
+import Image from "next/image";
+
+import nodata from "../../../svgs/nodata.svg";
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +36,24 @@ export default async function ViewBotsPage() {
                     ></Button>
                 </Link>
             </HeadingWithSideActionButton>
+            {(bots ?? []).length == 0 && (
+                <div className="flex justify-center">
+                    <div className="flex flex-col items-center">
+                        <Image
+                            src={nodata}
+                            width={300}
+                            height={300}
+                            alt="no data"
+                        />
+                        <span className="text-gray-800 text-2xl mt-2">
+                            {" "}
+                            You don't have any bots yet
+                        </span>
+                    </div>
+                </div>
+            )}
             <div className="grid grid-cols-5 gap-5">
-                {bots.map((m, i) => (
+                {(bots ?? []).map((m, i) => (
                     <BotDescription
                         key={i}
                         bot_description={m.bot_details.description}
