@@ -5,6 +5,8 @@ services:
     image: redis:alpine
     deploy:
       replicas: 1
+    ports:
+      - 6379:6379
   chat-service:
     image: atulvinod1911/botbuilder-chat-service:latest
     ports:
@@ -14,7 +16,7 @@ services:
     environment:
       - REDIS_HOST=redis
   embedding-service:
-    image: atulvinod1911/botbuilder-embedding-service:latest
+    image: atulvinod1911/botbuilder-embed-service:latest
     ports:
       - 5000:8000
     deploy:
