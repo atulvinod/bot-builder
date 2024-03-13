@@ -5,6 +5,7 @@ const proxy = createProxyMiddleware({
     target: getChatServiceHost(),
     secure: false,
     pathRewrite: { "^/api/chat": "" },
+    xfwd: true,
 });
 
 export const config = {
