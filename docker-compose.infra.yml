@@ -2,7 +2,8 @@ version: '3.1'
 
 services:
   database:
-    image: postgres
+    build:
+      context: ./dev_infra/db
     ports:
       - '5432:5432'
     environment:

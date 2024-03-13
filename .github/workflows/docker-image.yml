@@ -43,7 +43,7 @@ jobs:
                 context: './embed-service'
                 file: 'Dockerfile'
                 push: true
-                tags: 'atulvinod1911/bot-builder-embed-service:${{github.ref}}'
+                tags: 'atulvinod1911/botbuilder-embed-service:${{github.ref}}'
 
             - name: Docker Build Chat Service
               uses: docker/build-push-action@v2
@@ -51,5 +51,5 @@ jobs:
                 context: './chat-service'
                 file: 'Dockerfile'
                 push: true
-                tags: 'atulvinod1911/bot-builder-chat-service:${{github.ref}}'
+                tags: 'atulvinod1911/botbuilder-chat-service:${{github.ref}}'
 
