@@ -46,7 +46,6 @@ export default async function ViewBotsPage() {
                             alt="no data"
                         />
                         <span className="text-gray-800 text-2xl mt-2">
-                            {" "}
                             You don't have any bots yet
                         </span>
                     </div>
