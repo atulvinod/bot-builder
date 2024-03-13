@@ -22,7 +22,6 @@ logging.info('Running consumer')
 while True:
     queue_value = queue.popQueue()
     if queue_value is None:
-        logging.info('No value received, going to sleep')
         time.sleep(2)
     else:
         logging.info('Received task : ', queue_value)

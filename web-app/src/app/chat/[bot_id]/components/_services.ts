@@ -55,14 +55,11 @@ export async function getUserSession(
     bot_id: number,
     token: string
 ): Promise<string> {
-    const userSessionRequest = await fetch(
-        `${CHAT_SERVICE_HOST}/bot/${bot_id}/session`,
-        {
-            headers: {
-                Authorization: token,
-            },
-        }
-    );
+    const userSessionRequest = await fetch(`/api/chat/bot/${bot_id}/session`, {
+        headers: {
+            Authorization: token,
+        },
+    });
     if (!userSessionRequest.ok) {
         throw new AppError(
             StatusCodes.INTERNAL_SERVER_ERROR,
@@ -80,16 +77,13 @@ export async function getChatHistory(
     token: string,
     session_id: string
 ): Promise<ChatMessage[]> {
-    const chatHistoryRequest = await fetch(
-        `${CHAT_SERVICE_HOST}/bot/${bot_id}/history`,
-        {
-            cache: "no-store",
-            headers: {
-                [CHAT_SESSION_HEADER_NAME]: session_id,
-                Authorization: token,
-            },
-        }
-    );
+    const chatHistoryRequest = await fetch(`/api/chat/bot/${bot_id}/history`, {
+        cache: "no-store",
+        headers: {
+            [CHAT_SESSION_HEADER_NAME]: session_id,
+            Authorization: token,
+        },
+    });
     if (!chatHistoryRequest.ok) {
         throw new AppError(
             StatusCodes.INTERNAL_SERVER_ERROR,
