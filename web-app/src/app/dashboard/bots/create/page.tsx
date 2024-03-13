@@ -69,6 +69,8 @@ export default function CreateBotPage() {
         resolver: zodResolver(formSchema),
     });
 
+    const [isBotCreated, setBotCreated] = useState<boolean>(true);
+
     type FormDataStruct = z.infer<typeof formSchema>;
 
     const [trainingDataInputs, setTrainingDataInputs] = useState<
@@ -135,10 +137,7 @@ export default function CreateBotPage() {
                 );
             } else {
                 const body = await response.json();
-                router.replace(
-                    `/dashboard/bots/success?bot_id=${body.data.bot_id}`,
-                    {}
-                );
+                setBotCreated(true);
             }
         } catch (e: any) {
             toast.error("An unexpected error occurred, please try again later");
@@ -167,57 +166,91 @@ export default function CreateBotPage() {
     };
 
     return (
-        <Form {...form}>
-            <form
-                onSubmit={(e) => {
-                    submitAttempted.current = true;
-                    validateTrainingInputs();
-                    form.handleSubmit(publishBot)(e);
-                }}
-            >
-                <div>
-                    <HeadingWithSideActionButton heading={"Create new bot"}>
-                        <AppButton
-                            type="submit"
-                            variant={
-                                isRequestProcessing
-                                    ? ButtonVariants.Loading
-                                    : ButtonVariants.Magic
-                            }
-                            buttonText={
-                                isRequestProcessing ? "Publishing" : "Publish"
-                            }
-                        ></AppButton>
-                    </HeadingWithSideActionButton>
-                    <div>
-                        <div className="w-[50%]">
-                            <FormField
-                                control={form.control}
-                                name="botname"
-                                render={({ field }) => (
-                                    <div>
-                                        <FormLabel className="text-lg">
-                                            Name
-                                        </FormLabel>
-                                        <div className="flex flex-row items-start">
+        <>
+            {!isBotCreated ? (
+                <Form {...form}>
+                    <form
+                        onSubmit={(e) => {
+                            submitAttempted.current = true;
+                            validateTrainingInputs();
+                            form.handleSubmit(publishBot)(e);
+                        }}
+                    >
+                        <div>
+                            <HeadingWithSideActionButton
+                                heading={"Create new bot"}
+                            >
+                                <AppButton
+                                    type="submit"
+                                    variant={
+                                        isRequestProcessing
+                                            ? ButtonVariants.Loading
+                                            : ButtonVariants.Magic
+                                    }
+                                    buttonText={
+                                        isRequestProcessing
+                                            ? "Publishing"
+                                            : "Publish"
+                                    }
+                                ></AppButton>
+                            </HeadingWithSideActionButton>
+                            <div>
+                                <div className="w-[50%]">
+                                    <FormField
+                                        control={form.control}
+                                        name="botname"
+                                        render={({ field }) => (
                                             <div>
-                                                <div className="mt-2">
-                                                    <ImageInput
-                                                        isDisabled={
-                                                            isRequestProcessing
-                                                        }
-                                                        handleSetImage={
-                                                            setAvatarImage
-                                                        }
-                                                    />
+                                                <FormLabel className="text-lg">
+                                                    Name
+                                                </FormLabel>
+                                                <div className="flex flex-row items-start">
+                                                    <div>
+                                                        <div className="mt-2">
+                                                            <ImageInput
+                                                                isDisabled={
+                                                                    isRequestProcessing
+                                                                }
+                                                                handleSetImage={
+                                                                    setAvatarImage
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <FormItem className="mt-8 ml-5 flex-auto">
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                placeholder="Add a bot name"
+                                                                disabled={
+                                                                    isRequestProcessing
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                        <FormDescription className="border-1 bg-yellow-100 rounded-md p-4">
+                                                            Name displayed to
+                                                            the users
+                                                        </FormDescription>
+                                                    </FormItem>
                                                 </div>
                                             </div>
+                                        )}
+                                    />
 
-                                            <FormItem className="mt-8 ml-5 flex-auto">
+                                    <FormField
+                                        control={form.control}
+                                        name="bot_description"
+                                        render={({ field }) => (
+                                            <FormItem className="mt-10">
+                                                <FormLabel className="text-lg">
+                                                    Description
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input
+                                                    <Textarea
                                                         {...field}
-                                                        placeholder="Add a bot name"
+                                                        placeholder="Add a bot description"
                                                         disabled={
                                                             isRequestProcessing
                                                         }
@@ -225,105 +258,94 @@ export default function CreateBotPage() {
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription className="border-1 bg-yellow-100 rounded-md p-4">
-                                                    Name displayed to the users
+                                                    A bot description is like an
+                                                    introduction for a chatbot.
+                                                    It helps the chatbot know
+                                                    what it&apos;s supposed to
+                                                    do and what kind of answers
+                                                    it should give. It also
+                                                    tells users what the bot can
+                                                    help with, giving them an
+                                                    idea of what to expect.
                                                 </FormDescription>
                                             </FormItem>
+                                        )}
+                                    />
+                                    <div className="mt-10">
+                                        <FormLabel
+                                            className={
+                                                "text-lg " +
+                                                (submitAttempted.current &&
+                                                trainingDataErrors.length
+                                                    ? "text-destructive"
+                                                    : "")
+                                            }
+                                        >
+                                            Training Data
+                                        </FormLabel>
+                                        <div className="w-[60%] mt-1.5">
+                                            {trainingDataInputs.map(
+                                                (tdi, idx) => {
+                                                    if (
+                                                        tdi.type ==
+                                                        constants
+                                                            .TrainingAssetTypes
+                                                            .Files
+                                                    ) {
+                                                        return (
+                                                            <div key={idx}>
+                                                                <div>
+                                                                    <TrainingFilesInputV2
+                                                                        isDisabled={
+                                                                            isRequestProcessing
+                                                                        }
+                                                                        state={
+                                                                            tdi.value
+                                                                        }
+                                                                        onUpdate={(
+                                                                            ftd
+                                                                        ) => {
+                                                                            const newState =
+                                                                                new TrainingFilesInputConfigV2();
+                                                                            newState.setValue(
+                                                                                ftd
+                                                                            );
+                                                                            trainingDataInputs[
+                                                                                idx
+                                                                            ] =
+                                                                                newState;
+                                                                            setTrainingDataInputs(
+                                                                                [
+                                                                                    ...trainingDataInputs,
+                                                                                ]
+                                                                            );
+                                                                            validateTrainingInputs();
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <TrainingErrors
+                                                                    errors={
+                                                                        trainingDataErrors[
+                                                                            idx
+                                                                        ]
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        );
+                                                    }
+                                                }
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="bot_description"
-                                render={({ field }) => (
-                                    <FormItem className="mt-10">
-                                        <FormLabel className="text-lg">
-                                            Description
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                {...field}
-                                                placeholder="Add a bot description"
-                                                disabled={isRequestProcessing}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                        <FormDescription className="border-1 bg-yellow-100 rounded-md p-4">
-                                            A bot description is like an
-                                            introduction for a chatbot. It helps
-                                            the chatbot know what it&apos;s
-                                            supposed to do and what kind of
-                                            answers it should give. It also
-                                            tells users what the bot can help
-                                            with, giving them an idea of what to
-                                            expect.
-                                        </FormDescription>
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="mt-10">
-                                <FormLabel
-                                    className={
-                                        "text-lg " +
-                                        (submitAttempted.current &&
-                                        trainingDataErrors.length
-                                            ? "text-destructive"
-                                            : "")
-                                    }
-                                >
-                                    Training Data
-                                </FormLabel>
-                                <div className="w-[60%] mt-1.5">
-                                    {trainingDataInputs.map((tdi, idx) => {
-                                        if (
-                                            tdi.type ==
-                                            constants.TrainingAssetTypes.Files
-                                        ) {
-                                            return (
-                                                <div key={idx}>
-                                                    <div>
-                                                        <TrainingFilesInputV2
-                                                            isDisabled={
-                                                                isRequestProcessing
-                                                            }
-                                                            state={tdi.value}
-                                                            onUpdate={(ftd) => {
-                                                                const newState =
-                                                                    new TrainingFilesInputConfigV2();
-                                                                newState.setValue(
-                                                                    ftd
-                                                                );
-                                                                trainingDataInputs[
-                                                                    idx
-                                                                ] = newState;
-                                                                setTrainingDataInputs(
-                                                                    [
-                                                                        ...trainingDataInputs,
-                                                                    ]
-                                                                );
-                                                                validateTrainingInputs();
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <TrainingErrors
-                                                        errors={
-                                                            trainingDataErrors[
-                                                                idx
-                                                            ]
-                                                        }
-                                                    />
-                                                </div>
-                                            );
-                                        }
-                                    })}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </form>
-        </Form>
+                    </form>
+                </Form>
+            ) : (
+                <SuccessBanner name="asdf" />
+            )}
+        </>
     );
 }
 
