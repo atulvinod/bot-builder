@@ -49,7 +49,6 @@ jobs:
               uses: docker/build-push-action@v2
               with:
                 context: './embed-service'
-                file: 'Dockerfile'
                 push: true
                 tags: 'atulvinod1911/botbuilder-embed-service:latest'
 
@@ -57,7 +56,6 @@ jobs:
               uses: docker/build-push-action@v2
               with:
                 context: './chat-service'
-                file: 'Dockerfile'
                 push: true
                 tags: 'atulvinod1911/botbuilder-chat-service:latest'
 
