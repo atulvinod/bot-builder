@@ -5,12 +5,7 @@ import logging
 
 class AppQueue:
     def __init__(self) -> None:
-        self.redis_client = redis. Redis(
-            host=os.getenv("REDIS_HOST"),
-            port=os.getenv("REDIS_PORT"),
-            username= os.getenv("REDIS_USER"), 
-            password=os.getenv("REDIS_PASSWORD")
-            )
+        self.redis_client = redis.Redis.from_url(os.getenv("REDIS_URL"))
 
     def checkConnection(self):
         logging.info(self.redis_client.ping())
