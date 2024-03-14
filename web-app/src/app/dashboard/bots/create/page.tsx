@@ -69,7 +69,7 @@ export default function CreateBotPage() {
         resolver: zodResolver(formSchema),
     });
 
-    const [isBotCreated, setBotCreated] = useState<boolean>(true);
+    const [isBotCreated, setBotCreated] = useState<boolean>(false);
 
     type FormDataStruct = z.infer<typeof formSchema>;
 
@@ -343,7 +343,7 @@ export default function CreateBotPage() {
                     </form>
                 </Form>
             ) : (
-                <SuccessBanner name="asdf" />
+                <SuccessBanner />
             )}
         </>
     );
@@ -364,13 +364,13 @@ function TrainingErrors({ errors }: { errors: string[] }) {
     );
 }
 
-function SuccessBanner({ name }: { name: string }) {
+function SuccessBanner() {
     return (
         <div>
             <h1 className="text-7xl my-5">Success!</h1>
             <div className="my-10">
                 <p className="w-[30%]">
-                    Your bot &quot;{name}&quot; being created, it will be ready
+                    Your bot is being created, it will be ready
                     in some time as we are training on your data. We will inform
                     you once its ready
                 </p>
