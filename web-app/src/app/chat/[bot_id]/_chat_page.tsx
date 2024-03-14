@@ -28,7 +28,7 @@ import {
 import AvatarImage from "@/app/shared/components/avatar_image";
 import GoogleButton from "react-google-button";
 import { signIn } from "next-auth/react";
-import { fillPlaceholders } from "drizzle-orm";
+import Markdown from "react-markdown";
 
 export default function ChatPage({
     bot_details,
@@ -101,15 +101,10 @@ export default function ChatPage({
     async function getAnswer(question: string) {
         lastQuestionAsked.current = question;
         setInputEnabled(false);
+        setIsResponseErrored(false);
+
         let new_history = [...history];
 
-        /**
-         * If last response has errored, then remove the last user response and re-add the message
-         */
-        if (responseErrored) {
-            new_history.pop();
-            setIsResponseErrored(false);
-        }
         /**
          * Animate the fade in when the user has added the new message
          */
@@ -128,6 +123,8 @@ export default function ChatPage({
             question
         );
         if (!response.ok) {
+            new_history.pop();
+            setChatHistory([...new_history]);
             setIsResponseErrored(true);
             toast.error("Something went wrong, please try again");
             return;
@@ -136,7 +133,7 @@ export default function ChatPage({
         if (response.body && typeof response.body.getReader == "function") {
             const reader = response.body.getReader();
             let responseStreamData = "";
-            
+
             const read = () => {
                 reader.read().then(({ done, value }) => {
                     if (done) {
@@ -156,8 +153,13 @@ export default function ChatPage({
                             ];
                             setChatHistory(new_history);
                         } else {
-                            toast.error("Something went wrong, please try again");
+                            toast.error(
+                                "Something went wrong, please try again"
+                            );
+                            new_history.pop();
+                            setChatHistory([...new_history]);
                             setIsResponseErrored(true);
+                            setInputEnabled(true);
                         }
                         setInputEnabled(true);
                         setResponseStream(null);
@@ -240,7 +242,7 @@ export default function ChatPage({
                                                 key={i}
                                                 animate={h.animate ?? false}
                                             >
-                                                <span>{h.content}</span>
+                                                <Markdown>{h.content}</Markdown>
                                             </ChatBubble>
                                         );
                                     })}
@@ -254,9 +256,9 @@ export default function ChatPage({
                                                 )
                                             }
                                         >
-                                            <span>
+                                            <Markdown>
                                                 {lastQuestionAsked.current}
-                                            </span>
+                                            </Markdown>
                                         </ChatBubble>
                                     )}
                                     {responseStream &&
@@ -265,7 +267,7 @@ export default function ChatPage({
                                                 role={"assistant"}
                                                 animate={true}
                                             >
-                                                <span>{responseStream}</span>
+                                                <Markdown>{responseStream}</Markdown>
                                             </ChatBubble>
                                         )}
                                 </div>
@@ -281,7 +283,7 @@ export default function ChatPage({
                                                     getAnswer(q);
                                                 }}
                                             >
-                                                <span>{q}</span>
+                                                <Markdown>{q}</Markdown>
                                             </ChatBubble>
                                         ))}
                                     </div>

@@ -5,7 +5,7 @@ from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.agent.openai import OpenAIAgent
 from typing import List
 from lib.constants import TrainingAssetTypes
-from lib.utils.util import convertChatMessagesToJSON
+from lib.utils.util import convertChatMessagesToJSON, convertChatMessagesToDict
 import json
 import uuid
 from lib.models.app_error import AppError
@@ -14,8 +14,9 @@ from app import redis
 from app import pinecone
 from app import db
 from app import mongodb
-
 import logging
+
+chat_history_collection = mongodb["Cluster0"]["chat_history"]
 
 def getBotSpec(bot_id: int):
     cacheKey = f"bot-spec:{bot_id}"
@@ -42,12 +43,19 @@ def getHistoryCacheKey(bot_id: int, user_session_key:str):
 
 def retrieveChatHistory(bot_id: int, user_session_key:str = "system"):
     cacheKey = getHistoryCacheKey(bot_id, user_session_key)
-    history = json.loads(redis.get(cacheKey) or "[]")
+    history = []
+    cacheHit = redis.get(cacheKey)
 
-    def convertToChatMessage(x):
-        return ChatMessage(role=x["role"], content=x["content"])
+    if cacheHit:
+        history = json.loads(cacheHit)
+    else:
+        dbResult = chat_history_collection.find_one({"session": user_session_key})
+        if dbResult is not None and len(dbResult["history"]) != 0:
+            history = dbResult["history"]
 
-    chatHistory = list(map(convertToChatMessage, history))
+    chatHistory = list(
+        map(lambda x: ChatMessage(role=x["role"], content=x["content"]), history)
+    )
 
     return chatHistory
 
@@ -59,6 +67,11 @@ def updateChatHistory(
     merged_history = chat_history + new_messages
     historyJson = convertChatMessagesToJSON(merged_history)
     redis.set(cacheKey, historyJson)
+    chat_history_collection.update_one(
+        {"session": user_session_key},
+        {"$set": {"history": convertChatMessagesToDict(merged_history)}},
+        upsert=True,
+    )
 
 def getAgent(bot_id:int, user_session_key:str="system"):
     spec = getBotSpec(bot_id)
@@ -92,20 +105,21 @@ def getAgent(bot_id:int, user_session_key:str="system"):
 def getResponseStreamForQuery(bot_id: int, user_session_key, user_question: str):
     (agent, chat_history) = getAgent(bot_id, user_session_key)    
     responseText = ""
-    
+
     for x in agent.stream_chat(user_question).response_gen:
         responseText += x
         yield x
 
-    updateChatHistory(
-        bot_id,
-        user_session_key,
-        chat_history,
-        [
-            ChatMessage(role=MessageRole.USER, content=user_question),
-            ChatMessage(role=MessageRole.ASSISTANT, content=responseText),
-        ],
-    )
+    if len(responseText) != 0:
+        updateChatHistory(
+            bot_id,
+            user_session_key,
+            chat_history,
+            [
+                ChatMessage(role=MessageRole.USER, content=user_question),
+                ChatMessage(role=MessageRole.ASSISTANT, content=responseText),
+            ],
+        )
 
 def getResponseTextForQuery(bot_id, user_session_key, user_question: str):
     (agent, chat_history) = getAgent(bot_id, user_session_key)
