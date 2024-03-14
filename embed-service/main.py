@@ -1,12 +1,12 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import time
 import logging
 from lib.services.bot_trainer import BotTrainer
 import json
 from lib.clients.app_queue import AppQueue
-from dotenv import load_dotenv
 from lib.clients.email_client import sendSuccessMessage
-load_dotenv()
 
 logging.basicConfig(
      level=logging.DEBUG,
