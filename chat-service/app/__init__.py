@@ -5,13 +5,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-from lib.utils.pinecone_client import PineconeClient
-from lib.utils.redis_client import RedisClient
-from lib.utils.db_client import DB
+from lib.clients.pinecone_client import PineconeClient
+from lib.clients.redis_client import RedisClient
+from lib.clients.db_client import DB
+from lib.clients.mongo_client import MongoDB
 
 pinecone = PineconeClient().getClient()
 db = DB().getClient()
 redis = RedisClient().getClient()
+mongodb = MongoDB().getClient()
 
 from flask import Flask
 from flask_cors import CORS

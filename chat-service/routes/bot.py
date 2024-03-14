@@ -2,9 +2,9 @@ from flask import Blueprint, Response
 from flask import request, stream_with_context
 from lib.services.chat_service import retrieveChatHistory, getResponseTextForQuery, getSuggestedQuestions, getChatSession, getResponseStreamForQuery, resetChatSession
 import time
-from lib.utils.auth_middleware import authorize
-from lib.utils.app_error import AppError
-from lib.utils.usersession_middleware import usersession_required
+from lib.middlewares.auth_middleware import authorize
+from lib.models.app_error import AppError
+from lib.middlewares.usersession_middleware import usersession_required
 import logging
 
 routeBlueprint = Blueprint("chat",__name__, url_prefix="/bot")

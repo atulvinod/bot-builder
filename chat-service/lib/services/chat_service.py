@@ -4,15 +4,17 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.agent.openai import OpenAIAgent
 from typing import List
-from ..utils.constants import TrainingAssetTypes
-from ..utils.util import convertChatMessagesToJSON
+from lib.constants import TrainingAssetTypes
+from lib.utils.util import convertChatMessagesToJSON
 import json
 import uuid
-from lib.utils.app_error import AppError
+from lib.models.app_error import AppError
 
 from app import redis
 from app import pinecone
 from app import db
+from app import mongodb
+
 import logging
 
 def getBotSpec(bot_id: int):
@@ -150,7 +152,7 @@ def resetChatSession(bot_id, user_id, session_id):
 
     if session is None:
         raise AppError("Session not found",404)
-    
+
     db.run("DELETE FROM chat_sessions WHERE session_id = %(session_id)s",{"session_id":session_id})
-        
+
     return getChatSession(bot_id, user_id)

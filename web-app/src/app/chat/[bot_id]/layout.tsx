@@ -3,6 +3,7 @@ import { db_client } from "@/lib/db";
 import * as schema from "../../../schemas/schemas";
 import { eq } from "drizzle-orm";
 import ChatPageRoot from "./page";
+import { notFound } from "next/navigation";
 
 const CHAT_SERVICE_HOST = getChatServiceHost();
 
@@ -13,7 +14,7 @@ export default async function ChatPageLayout({
     children: React.ReactElement;
     params: { bot_id: number };
 }) {
-    const [{ bot_details: botDetails, users: createdByUser }] = await db_client
+    const [result] = await db_client
         .select()
         .from(schema.botDetails)
         .innerJoin(
@@ -22,6 +23,12 @@ export default async function ChatPageLayout({
         )
         .where(eq(schema.botDetails.id, params.bot_id))
         .limit(1);
+
+    if (!result) {
+        throw notFound();
+    }
+
+    const { bot_details: botDetails, users: createdByUser } = result;
 
     let suggestedQuestions = [];
     const suggestedQuestionsRequest = await fetch(

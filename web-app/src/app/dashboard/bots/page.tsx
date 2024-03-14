@@ -10,6 +10,7 @@ import { unstable_noStore } from "next/cache";
 import Image from "next/image";
 
 import nodata from "../../../svgs/nodata.svg";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,10 @@ export default async function ViewBotsPage() {
         )
         .where(eq(schema.botDetails.created_by_user_id, session?.user!!.id))
         .orderBy(desc(schema.botDetails.created_at));
+
+    if (!bots) {
+        throw notFound();
+    }
 
     return (
         <div>
