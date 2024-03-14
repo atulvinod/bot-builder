@@ -35,14 +35,14 @@ jobs:
               with:
                 fileName: '.env'
                 fileDir: './embed-service'
-                encodedString: ${{secrets.EMBED_SERVICE_ENV}}
+                encodedString: ${{secrets.ENV}}
             
             - name: Build Chat service config
               uses: timheuer/base64-to-file@v1.2
               with:
                 fileName: '.env'
                 fileDir: './chat-service'
-                encodedString: ${{secrets.CHAT_SERVICE_ENV}}
+                encodedString: ${{secrets.ENV}}
 
 
             - name: Docker Build Embedding Service

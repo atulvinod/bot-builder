@@ -16,4 +16,3 @@ class AppQueue:
             if queue_value is None:
                 return None
             task = json.loads(queue_value)
-            return task

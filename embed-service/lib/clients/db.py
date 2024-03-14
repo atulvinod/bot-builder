@@ -1,9 +1,22 @@
 import os
 from postgres import Postgres
 
-class DB:
+
+class DB():
+    __instance = None
+
+    @staticmethod
+    def getInstance():
+        if DB.__instance == None:
+            DB.__instance = DB()
+        return DB.__instance
+
     def __init__(self):
-        self.db_client =  Postgres(url=self.getPostgresConnectionURL())
+        if DB.__instance  != None:
+            raise Exception("Singleton class")
+        else:
+            self.db_client = Postgres(self.getPostgresConnectionURL())
+            DB.__instance = self
 
     def getPostgresConnectionURL(self):
         username = os.getenv('DB_USER')

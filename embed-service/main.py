@@ -1,13 +1,11 @@
 import os
 import time
 import logging
-from bot_trainer import BotTrainer
+from lib.services.bot_trainer import BotTrainer
 import json
-from app_queue import AppQueue
-
+from lib.clients.app_queue import AppQueue
 from dotenv import load_dotenv
-
-
+from lib.clients.email_client import sendSuccessMessage
 load_dotenv()
 
 logging.basicConfig(
@@ -16,8 +14,8 @@ logging.basicConfig(
 )
 
 queue = AppQueue()
-
 bot_trainer = BotTrainer()
+
 logging.info('Running consumer')
 while True:
     queue_value = queue.popQueue()

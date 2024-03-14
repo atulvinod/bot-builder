@@ -11,7 +11,7 @@ from lib.clients.db_client import DB
 from lib.clients.mongo_client import MongoDB
 
 pinecone = PineconeClient().getClient()
-db = DB().getClient()
+db = DB.getInstance().getClient()
 redis = RedisClient().getClient()
 mongodb = MongoDB().getClient()
 

@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import storage
 import firebase_admin
 import tempfile
-from constants import TrainingAssetDefinitions
+from lib.constants import TrainingAssetDefinitions
 
 class Storage:
     def __init__(self) -> None:

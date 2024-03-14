@@ -1,21 +1,21 @@
-from db import DB
+from lib.clients.db import DB
 import json
 from typing import List, Dict
-from constants import TrainingAssetTypes, BotStatus, TrainingAssetDefinitions
-from storage import Storage
+from lib.constants import TrainingAssetTypes, BotStatus, TrainingAssetDefinitions
+from lib.clients.storage import Storage
 import logging
 import zipfile
 import os
 from pinecone import ServerlessSpec, PineconeApiException
-from pinecone_client import PineconeClient
+from lib.clients.pinecone_client import PineconeClient
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
 from llama_index.vector_stores.pinecone import PineconeVectorStore
+from lib.clients.email_client import sendSuccessMessage
 import shutil
-
 
 class BotTrainer:
     def __init__(self):
-        self.db = DB()
+        self.db = DB.getInstance()
         self.storage = Storage()
         self.pinecone = PineconeClient().client
     
@@ -74,6 +74,7 @@ class BotTrainer:
                 logging.info("Vectors built using training files")
         
         shutil.rmtree(training_asset_directory)
+        sendSuccessMessage(bot_id)
     
     def process(self, bot_id: int):
         try:
