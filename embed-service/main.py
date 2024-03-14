@@ -16,13 +16,17 @@ logging.basicConfig(
 queue = AppQueue()
 bot_trainer = BotTrainer()
 
-logging.info('Running consumer')
-while True:
-    queue_value = queue.popQueue()
-    if queue_value is None:
-        time.sleep(2)
-    else:
-        logging.info('Received task : ', queue_value)
-        bot_id = queue_value['bot_id']
-        logging.info('Processing bot '+str(bot_id))
-        bot_trainer.process(bot_id)
+try:
+    queue.checkConnection()
+    logging.info("Running consumer")
+    while True:
+        queue_value = queue.popQueue()
+        if queue_value is None:
+            time.sleep(2)
+        else:
+            logging.info("Received task : ", queue_value)
+            bot_id = queue_value["bot_id"]
+            logging.info("Processing bot " + str(bot_id))
+            bot_trainer.process(bot_id)
+except Exception as e:
+    logging.error("Not able to connected to redis: " + str(e))
