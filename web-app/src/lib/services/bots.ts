@@ -175,7 +175,9 @@ export async function createBot(
             return null;
         }
     });
+    console.log(`Created bot with id: `, botId);
     if (botId) {
+        console.log("Pushing to queue");
         await pushToTaskQueue(botId);
     }
     return botId;
