@@ -60,7 +60,7 @@ class BotTrainer:
             logging.info("Reading training files")
             training_files = SimpleDirectoryReader(
                 input_dir=training_files_directory, recursive=True
-            ).load_data(num_workers=5)
+            ).load_data()
             pinecone_vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
             pinecone_storage_context = StorageContext.from_defaults(vector_store=pinecone_vector_store)
             logging.info("Building vector index from training files")
