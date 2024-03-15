@@ -18,7 +18,7 @@ class BotTrainer:
         self.db = DB.getInstance()
         self.storage = Storage()
         self.pinecone = PineconeClient().client
-    
+
     def updateBotStatus(self, bot_id: int, bot_status: BotStatus):
         self.db.getDbClient().run("UPDATE bot_details SET status = %(status)s WHERE id = %(bot_id)s", {"status" : bot_status.value, "bot_id" :bot_id})
 
@@ -39,7 +39,7 @@ class BotTrainer:
                 raise apiEx 
         index = self.pinecone.Index(index_key)
         return index
-        
+
     def __createTrainingFilesDirectory(self, training_asset_directory):
         tf_path = os.path.join(training_asset_directory, 'training_files')
         os.mkdir(tf_path)
@@ -58,7 +58,9 @@ class BotTrainer:
             self.__extractAssetsZipToTrainingDir(training_files_directory, downloaded_asset_path)
             pinecone_index = self.__getPineconeIndex(bot_id, files_id)
             logging.info("Reading training files")
-            training_files = SimpleDirectoryReader(input_dir=training_files_directory, recursive=True).load_data(show_progress=True)
+            training_files = SimpleDirectoryReader(
+                input_dir=training_files_directory, recursive=True
+            ).load_data(num_workers=5)
             pinecone_vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
             pinecone_storage_context = StorageContext.from_defaults(vector_store=pinecone_vector_store)
             logging.info("Building vector index from training files")
@@ -66,16 +68,23 @@ class BotTrainer:
 
     def __processTrainingData(self, bot_id:int ,assets_id: str ,training_spec: List[Dict]):
         training_asset_directory = self.storage.createTrainingAssetDirectory(assets_id)
-        
-        for ts in training_spec:
-            if (ts['type'] == TrainingAssetTypes.Files.value):
-                logging.info("Building vectors using training files")
-                self.__buildVectorsUsingFiles(ts['config'], training_asset_directory, bot_id, assets_id)
-                logging.info("Vectors built using training files")
-        
+        isCompleted = True
+        try:
+            for ts in training_spec:
+                if ts["type"] == TrainingAssetTypes.Files.value:
+                    logging.info("Building vectors using training files")
+                    self.__buildVectorsUsingFiles(
+                        ts["config"], training_asset_directory, bot_id, assets_id
+                    )
+                    logging.info("Vectors built using training files")
+        except Exception as ex:
+            logging.error("Failed training ", str(ex))
+            isCompleted = False
+
         shutil.rmtree(training_asset_directory)
-        sendSuccessMessage(bot_id)
-    
+        if isCompleted:
+            sendSuccessMessage(bot_id)
+
     def process(self, bot_id: int):
         try:
             self.updateBotStatus(bot_id, BotStatus.InProgress)
@@ -89,7 +98,3 @@ class BotTrainer:
         except Exception as e:
             self.updateBotStatus(bot_id, BotStatus.Failed)
             logging.error('An error occurred when creating bot :'+str(e))
-
-
-
-        
