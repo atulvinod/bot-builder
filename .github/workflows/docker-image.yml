@@ -46,14 +46,14 @@ jobs:
 
 
             - name: Docker Build Embedding Service
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v5
               with:
                 context: './embed-service'
                 push: true
                 tags: 'atulvinod1911/botbuilder-embed-service:latest'
 
             - name: Docker Build Chat Service
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v5
               with:
                 context: './chat-service'
                 push: true
