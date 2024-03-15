@@ -1,6 +1,7 @@
 import AvatarImage from "./avatar_image";
 import { getServerSession } from "next-auth";
 import Breadcrumbs from "./breadcrumbs";
+import NavbarUser from "./user_navbar";
 
 export default async function Navbar() {
     const session = await getServerSession();
@@ -11,7 +12,7 @@ export default async function Navbar() {
                 <Breadcrumbs />
             </div>
             <div>
-                <AvatarImage path={session?.user?.image}></AvatarImage>
+                <NavbarUser />
             </div>
         </nav>
     );
