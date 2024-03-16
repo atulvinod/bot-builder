@@ -1,5 +1,17 @@
 version: "3.1"
 services:
+    upload-service:
+        build:
+            context: ./upload-service
+        ports:
+            - 3000:3000
+        environment:
+            - DB_HOST=database
+            - DB_USER=postgres
+            - DB_PASSWORD=mypassword
+            - DB_DATABASE=bot_builder
+            - DB_PORT=5432
+            - REDIS_HOST=redis
     embedding-service:
         build:
             context: ./embed-service

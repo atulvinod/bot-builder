@@ -127,16 +127,18 @@ export default function CreateBotPage() {
         const uploadFormPayload = buildFromObject(formData);
         try {
             setIsRequestProcessing(true);
-            const response = await fetch("/api/bot", {
-                method: "POST",
-                body: uploadFormPayload,
-            });
+            const response = await fetch(
+                `${process.env.UPLOAD_SERVICE_HOST}/upload`,
+                {
+                    method: "POST",
+                    body: uploadFormPayload,
+                }
+            );
             if (!response.ok) {
                 toast.error(
                     "An unexpected error occurred, please try again later"
                 );
             } else {
-                const body = await response.json();
                 setBotCreated(true);
             }
         } catch (e: any) {
