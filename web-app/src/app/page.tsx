@@ -1,6 +1,6 @@
 import Navbar from "./shared/components/navbar";
 
-export default function Helloworld() {
+export default function Root() {
     return (
         <main>
             <Navbar />
