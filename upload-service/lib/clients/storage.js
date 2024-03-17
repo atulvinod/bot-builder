@@ -38,8 +38,7 @@ async function uploadFile(
 ) {
     const root = getStorage(app);
     const folderRef = ref(root, `${folder}/${file_name}`);
-    const fileBuffer = await file.arrayBuffer();
-    const result = await uploadBytes(folderRef, fileBuffer, {
+    const result = await uploadBytes(folderRef, file.file, {
         contentType: "",
     });
     return result;

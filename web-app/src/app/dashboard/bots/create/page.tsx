@@ -35,6 +35,7 @@ import TrainingFilesInputV2, {
     FileTrainingData,
 } from "@/app/shared/components/file_training_data_input";
 import Link from "next/link";
+import { SessionProvider, useSession } from "next-auth/react";
 
 const formSchema = z.object({
     botname: z
@@ -56,7 +57,16 @@ const formSchema = z.object({
 });
 
 export default function CreateBotPage() {
+    return (
+        <SessionProvider>
+            <Content />
+        </SessionProvider>
+    );
+}
+
+export function Content() {
     const router = useRouter();
+    const session = useSession();
     const [trainingDataErrors, setTrainingDataErrors] = useState<string[][]>(
         []
     );
@@ -127,11 +137,15 @@ export default function CreateBotPage() {
         const uploadFormPayload = buildFromObject(formData);
         try {
             setIsRequestProcessing(true);
+
             const response = await fetch(
-                `${process.env.UPLOAD_SERVICE_HOST}/upload`,
+                `${process.env.NEXT_PUBLIC_UPLOAD_SERVICE_API}/upload`,
                 {
                     method: "POST",
                     body: uploadFormPayload,
+                    headers: {
+                        Authorization: `Bearer ${session.data?.jwt}`,
+                    },
                 }
             );
             if (!response.ok) {
