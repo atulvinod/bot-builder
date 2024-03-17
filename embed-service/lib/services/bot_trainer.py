@@ -87,8 +87,11 @@ class BotTrainer:
 
     def process(self, bot_id: int):
         try:
-            self.updateBotStatus(bot_id, BotStatus.InProgress)
             bot_details = self.db.getBotDetailsById(bot_id)
+            if bot_details is None:
+                logging.error(f"No bot found with the id {bot_id}")
+                return
+            self.updateBotStatus(bot_id, BotStatus.InProgress)
             bot_spec = json.loads(bot_details.spec)
             training_spec = bot_spec['training_spec']
             assets_id = bot_details.assets_id
