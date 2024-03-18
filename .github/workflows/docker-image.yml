@@ -62,8 +62,7 @@ jobs:
             - name: log
               env:
                 var1: ${{needs.check_modified_files.outputs.run_embed_service}}
-              run: |
-                echo "$var1"
+              run: echo "$var1"
 
     # build_embed_service:
     #     needs: check_modified_files
