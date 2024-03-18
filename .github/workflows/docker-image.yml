@@ -49,7 +49,7 @@ jobs:
                     run_embed_service=true
                   fi
                 done < files.txt
-                              
+                echo "Run embed service $run_embed_service"
                 echo "::set-output name=run_upload_service::$run_upload_service"
                 echo "::set-output name=run_chat_service::$run_chat_service"
                 echo "::set-output name=run_embed_service::$run_embed_service"
@@ -60,7 +60,7 @@ jobs:
       steps:
         - name: Echo var
           run: |
-            echo ${{needs.check_modified_files.outputs.run_embed_service}}
+            echo "${{needs.check_modified_files.outputs.run_embed_service}}"
 
     # build_embed_service:
     #     needs: check_modified_files
