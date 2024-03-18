@@ -92,7 +92,7 @@ class BotTrainer:
                 logging.error(f"No bot found with the id {bot_id}")
                 return
             self.updateBotStatus(bot_id, BotStatus.InProgress)
-            bot_spec = json.loads(bot_details.spec)
+            bot_spec = bot_details.spec
             training_spec = bot_spec['training_spec']
             assets_id = bot_details.assets_id
             self.__processTrainingData(bot_id, assets_id ,training_spec)
