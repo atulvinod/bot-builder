@@ -52,14 +52,14 @@ jobs:
                 echo "Run embed service $run_embed_service"
                 echo "::set-output name=run_upload_service::$run_upload_service"
                 echo "::set-output name=run_chat_service::$run_chat_service"
-                echo "::set-output name=run_embed_service::$run_embed_service"
+                echo "::set-output name=run_embed_service::true"
 
 
     build_embed_service:
         needs: check_modified_files
         runs-on: ubuntu-latest
         environment: production
-        if: needs.check_modified_files.outputs.run_embed_service=='true'
+        if: needs.check_modified_files.outputs.run_embed_service == 'true'
         steps:
           - name: Checkout Branch
             uses: actions/checkout@v3
