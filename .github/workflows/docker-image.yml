@@ -63,7 +63,7 @@ jobs:
         environment: production
         steps:
             - name: log
-              run: echo "$GITHUB_OUTPUT"
+              run: echo "${{needs.check_modified_files.outputs.test}}"
 
     # build_embed_service:
     #     needs: check_modified_files
