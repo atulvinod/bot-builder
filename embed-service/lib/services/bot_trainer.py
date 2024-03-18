@@ -79,6 +79,7 @@ class BotTrainer:
                     logging.info("Vectors built using training files")
         except Exception as ex:
             logging.error("Failed training ", str(ex))
+            self.updateBotStatus(bot_id, BotStatus.Failed)
             isCompleted = False
 
         shutil.rmtree(training_asset_directory)
