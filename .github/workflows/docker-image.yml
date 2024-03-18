@@ -11,22 +11,22 @@ on:
           description: "Build chat service?"
           type: boolean
           required: true
-          default: true
+          default: false
         build_embed:
           description: "Build embed service?"
           type: boolean
           required: true
-          default: true
+          default: false
         build_upload:
           description: "Build upload service"
           type: boolean
           required: true
-          default: true
+          default: false
     release:
         types: [published]
 
 jobs:
-    check_modified_files:
+    setup:
         runs-on: ubuntu-latest
         environment: production          
         outputs:
@@ -77,80 +77,80 @@ jobs:
                 echo "run_chat_service=$run_chat_service" >> $GITHUB_OUTPUT
                 echo "run_embed_service=$run_embed_service" >> $GITHUB_OUTPUT
 
-    build_embed_service:
-        needs: check_modified_files
-        runs-on: ubuntu-latest
-        environment: production
-        if: needs.check_modified_files.outputs.run_embed_service == 'true' || github.event.inputs.build_embed
-        steps:
-          - name: Checkout Branch
-            uses: actions/checkout@v3
-            with:
-              fetch-depth: 2
+    # build_embed_service:
+    #     needs: setup
+    #     runs-on: ubuntu-latest
+    #     environment: production
+    #     if: needs.setup.outputs.run_embed_service == 'true' || github.event.inputs.build_embed
+    #     steps:
+    #       - name: Checkout Branch
+    #         uses: actions/checkout@v3
+    #         with:
+    #           fetch-depth: 2
 
-          - name: Login to Dockerhub
-            uses: docker/login-action@v1
-            with:
-              username: ${{secrets.DOCKER_USERNAME}}
-              password: ${{secrets.DOCKER_PASSWORD}}
+    #       - name: Login to Dockerhub
+    #         uses: docker/login-action@v1
+    #         with:
+    #           username: ${{secrets.DOCKER_USERNAME}}
+    #           password: ${{secrets.DOCKER_PASSWORD}}
 
-          - name: Build Firebase Service Config
-            uses: timheuer/base64-to-file@v1.2
-            with:
-              fileName: 'firebase_service_account_config.json'
-              fileDir: './embed-service'
-              encodedString: ${{secrets.FIREBASE_SERVICE_CONFIG}}
+    #       - name: Build Firebase Service Config
+    #         uses: timheuer/base64-to-file@v1.2
+    #         with:
+    #           fileName: 'firebase_service_account_config.json'
+    #           fileDir: './embed-service'
+    #           encodedString: ${{secrets.FIREBASE_SERVICE_CONFIG}}
 
-          - name: Build Embed service config
-            uses: timheuer/base64-to-file@v1.2
-            with:
-              fileName: '.env'
-              fileDir: './embed-service'
-              encodedString: ${{secrets.ENV}}
+    #       - name: Build Embed service config
+    #         uses: timheuer/base64-to-file@v1.2
+    #         with:
+    #           fileName: '.env'
+    #           fileDir: './embed-service'
+    #           encodedString: ${{secrets.ENV}}
                 
-          - name: Docker Build Embedding Service
-            uses: docker/build-push-action@v5
-            with:
-              context: './embed-service'
-              push: true
-              tags: "atulvinod1911/botbuilder-embed-service:${{github.event.inputs.image_tag || 'latest'}}"
+    #       - name: Docker Build Embedding Service
+    #         uses: docker/build-push-action@v5
+    #         with:
+    #           context: './embed-service'
+    #           push: true
+    #           tags: "atulvinod1911/botbuilder-embed-service:${{github.event.inputs.image_tag || 'latest'}}"
 
-    build_chat_service:
-      needs: check_modified_files
-      runs-on: ubuntu-latest
-      environment: production
-      if: needs.check_modified_files.outputs.run_chat_service == 'true' || github.event.inputs.build_chat
-      steps:
-        - name: Checkout Branch
-          uses: actions/checkout@v3
-          with:
-            fetch-depth: 2
+    # build_chat_service:
+    #   needs: setup
+    #   runs-on: ubuntu-latest
+    #   environment: production
+    #   if: needs.setup.outputs.run_chat_service == 'true' || github.event.inputs.build_chat
+    #   steps:
+    #     - name: Checkout Branch
+    #       uses: actions/checkout@v3
+    #       with:
+    #         fetch-depth: 2
 
-        - name: Login to Dockerhub
-          uses: docker/login-action@v1
-          with:
-            username: ${{secrets.DOCKER_USERNAME}}
-            password: ${{secrets.DOCKER_PASSWORD}}
+    #     - name: Login to Dockerhub
+    #       uses: docker/login-action@v1
+    #       with:
+    #         username: ${{secrets.DOCKER_USERNAME}}
+    #         password: ${{secrets.DOCKER_PASSWORD}}
       
-        - name: Build Chat service config
-          uses: timheuer/base64-to-file@v1.2
-          with:
-            fileName: '.env'
-            fileDir: './chat-service'
-            encodedString: ${{secrets.ENV}}
+    #     - name: Build Chat service config
+    #       uses: timheuer/base64-to-file@v1.2
+    #       with:
+    #         fileName: '.env'
+    #         fileDir: './chat-service'
+    #         encodedString: ${{secrets.ENV}}
 
-        - name: Docker Build Chat Service
-          uses: docker/build-push-action@v5
-          with:
-            context: './chat-service'
-            push: true
-            tags: "atulvinod1911/botbuilder-chat-service:${{github.event.inputs.image_tag || 'latest'}}"
+    #     - name: Docker Build Chat Service
+    #       uses: docker/build-push-action@v5
+    #       with:
+    #         context: './chat-service'
+    #         push: true
+    #         tags: "atulvinod1911/botbuilder-chat-service:${{github.event.inputs.image_tag || 'latest'}}"
 
     build_upload_service:
-      needs: check_modified_files
+      needs: setup
       runs-on: ubuntu-latest
       environment: production
-      if: needs.check_modified_files.outputs.run_upload_service == 'true' || github.event.inputs.build_upload
+      if: needs.setup.outputs.run_upload_service == 'true' || github.event.inputs.build_upload
       steps:
         - name: Checkout Branch
           uses: actions/checkout@v3
