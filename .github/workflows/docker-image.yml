@@ -6,7 +6,7 @@ on:
         types: [published]
 
 jobs:
-    check_modified_files_job:
+    check_modified_files:
         runs-on: ubuntu-latest
         environment: production
         steps:
@@ -20,7 +20,7 @@ jobs:
                 echo "Ref:  -> ${{ github.ref }}"
 
             - name: Get modified services
-              id: check_modified_files
+              id: modified_files
               run: |
                 echo "Modified files"
                 git diff --name-only HEAD^ HEAD
@@ -55,10 +55,10 @@ jobs:
                 echo "::set-output name=run_embed_service::$run_embed_service"
 
     build_embed_service:
-        needs: check_modified_files_job
+        needs: check_modified_files
         runs-on: ubuntu-latest
         environment: production
-        if : ${{needs.check_modified_files_job.outputs.run_embed_service==true}}
+        if : ${{needs.check_modified_files.outputs.run_embed_service=='true'}}
         steps:
           - name: Checkout Branch
             uses: actions/checkout@v3
@@ -93,10 +93,10 @@ jobs:
               tags: 'atulvinod1911/botbuilder-embed-service:latest'
 
     build_chat_service:
-      needs: check_modified_files_job
+      needs: check_modified_files
       runs-on: ubuntu-latest
       environment: production
-      if : ${{needs.check_modified_files_job.outputs.run_chat_service==true}}
+      if : ${{needs.check_modified_files.outputs.run_chat_service=='true'}}
       steps:
         - name: Checkout Branch
           uses: actions/checkout@v3
@@ -124,10 +124,10 @@ jobs:
             tags: 'atulvinod1911/botbuilder-chat-service:latest'
 
     build_upload_service:
-      needs: check_modified_files_job
+      needs: check_modified_files
       runs-on: ubuntu-latest
       environment: production
-      if : ${{needs.check_modified_files_job.outputs.run_chat_service==true}}
+      if : ${{needs.check_modified_files.outputs.run_chat_service=='true'}}
       steps:
         - name: Checkout Branch
           uses: actions/checkout@v3
