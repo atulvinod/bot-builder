@@ -152,6 +152,8 @@ jobs:
       environment: production
       if: needs.setup.outputs.run_upload_service == 'true' || github.event.inputs.build_upload
       steps:
+        - name: Debug
+          run: echo ${{github.event.inputs.build_upload}}
         - name: Checkout Branch
           uses: actions/checkout@v3
           with:
