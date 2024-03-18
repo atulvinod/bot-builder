@@ -11,7 +11,7 @@ jobs:
         environment: production          
         steps:
            - name: Dummy echo
-             run: echo "test=abc" >> "$GITHUB_OUTPUT"
+             run: echo "test=abc" >> $GITHUB_OUTPUT
 
             # - name: Checkout Branch
             #   uses: actions/checkout@v3
