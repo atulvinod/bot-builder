@@ -150,7 +150,7 @@ jobs:
       needs: setup
       runs-on: ubuntu-latest
       environment: production
-      if: needs.setup.outputs.run_upload_service == 'true' || github.event.inputs.build_upload
+      if: needs.setup.outputs.run_upload_service == 'true' || github.event.inputs.build_upload == 'true'
       steps:
         - name: Debug
           run: echo ${{github.event.inputs.build_upload}}
