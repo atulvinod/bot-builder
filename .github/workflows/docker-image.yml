@@ -9,8 +9,11 @@ jobs:
     check_modified_files:
         runs-on: ubuntu-latest
         environment: production          
+        outputs:
+          test: ${{ steps.step1.outputs.test }}
         steps:
            - name: Dummy echo
+             id: step1
              run: echo "test=abc" >> $GITHUB_OUTPUT
 
             # - name: Checkout Branch
