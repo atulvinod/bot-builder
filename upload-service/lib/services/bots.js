@@ -171,6 +171,7 @@ async function createBot(
         );
         botDataUploadRefs.push(...detailUploadRefs);
         console.log("Pushing to queue");
+        await tx.commit()
         await pushToTaskQueue(botId);
         console.log(`Created bot with id: `, botId);
 
