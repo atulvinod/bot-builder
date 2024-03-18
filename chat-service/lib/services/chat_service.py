@@ -28,8 +28,8 @@ def getBotSpec(bot_id: int):
         )
         if db_value is None:
             raise Exception("Bot id is invalid")
-        spec = json.loads(db_value)
-        redis.set(cacheKey, db_value)
+        spec = db_value
+        redis.set(cacheKey, json.dumps(db_value))
         return spec
 
     data = json.loads(cacheHit)
