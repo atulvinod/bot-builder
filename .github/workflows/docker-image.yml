@@ -80,6 +80,14 @@ jobs:
             fileName: '.env'
             fileDir: ./${{ matrix.service }}-service
             encodedString: ${{secrets.ENV}}
+              
+        - name: Build Firebase config
+          uses: timheuer/base64-to-file@v1.2
+          if: ${{matrix.service == 'embed'}}
+          with:
+            fileName: 'firebase_service_account_config.json'
+            fileDir: './embed-service'
+            encodedString: ${{secrets.FIREBASE_SERVICE_CONFIG}}
   
         - name: Docker Build Service
           uses: docker/build-push-action@v5
