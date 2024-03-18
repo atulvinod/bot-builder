@@ -24,7 +24,7 @@ jobs:
                 echo "Modified files"
                 git diff --name-only HEAD^ HEAD
                 echo "Paths of modified files"
-                git diff --name-only HEAD^ HEAD &gt; files.txt
+                git diff --name-only HEAD^ HEAD > files.txt
                 
                 run_upload_service=false
                 run_chat_service=false
@@ -47,7 +47,7 @@ jobs:
                     echo "Files modified in embed service"
                     run_embed_service=true
                   fi
-                done &lt; files.txt
+                done < files.txt
                               
                 echo "::set-output name=run_upload_service::$run_upload_service"
                 echo "::set-output name=run_chat_service::$run_chat_service"
