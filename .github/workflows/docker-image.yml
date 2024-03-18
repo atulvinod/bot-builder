@@ -12,7 +12,7 @@ jobs:
         steps:
            - name: Dummy echo
              run: |
-              echo "test=abc" > "$GITHUB_OUTPUT"
+              echo "test=abc" >> "$GITHUB_OUTPUT"
 
             # - name: Checkout Branch
             #   uses: actions/checkout@v3
@@ -65,8 +65,8 @@ jobs:
         steps:
             - name: log
               env:
-                var1: ${{needs.check_modified_files.outputs.test}}
-              run: echo "$var1"
+                VAR: ${{needs.check_modified_files.outputs.test}}
+              run: echo "$VAR"
 
     # build_embed_service:
     #     needs: check_modified_files
