@@ -62,6 +62,7 @@ jobs:
         needs: check_modified_files
         runs-on: ubuntu-latest
         environment: production
+        if: needs.check_modified_files.outputs.test == 'abc'
         steps:
             - name: log
               env:
