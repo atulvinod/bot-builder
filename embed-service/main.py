@@ -15,6 +15,7 @@ logging.basicConfig(
 
 queue = AppQueue()
 bot_trainer = BotTrainer()
+logging.info("EMBED SERVICE")
 try:
     queue.checkConnection()
     logging.info("Running consumer")
