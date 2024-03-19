@@ -39,7 +39,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
-    is_private: z.boolean({ required_error: "Is private bot required" }),
+    is_private: z.boolean({ required_error: "Is private bot required" }).default(false),
     botname: z
         .string({ required_error: "Botname is required" })
         .min(
