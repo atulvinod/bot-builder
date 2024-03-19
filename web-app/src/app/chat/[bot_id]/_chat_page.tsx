@@ -127,6 +127,7 @@ export default function ChatPage({
             setChatHistory([...new_history]);
             setIsResponseErrored(true);
             toast.error("Something went wrong, please try again");
+            console.error("Errored due to API error");
             return;
         }
 
@@ -153,6 +154,7 @@ export default function ChatPage({
                             ];
                             setChatHistory(new_history);
                         } else {
+                            console.error("Errored due to no empty response");
                             toast.error(
                                 "Something went wrong, please try again"
                             );
@@ -179,6 +181,7 @@ export default function ChatPage({
 
     async function clearChat() {
         setChatReady(false);
+        setIsResponseErrored(false);
         try {
             const sessionId = await clearChatRequest(
                 bot_details.id,
@@ -267,11 +270,13 @@ export default function ChatPage({
                                                 role={"assistant"}
                                                 animate={true}
                                             >
-                                                <Markdown>{responseStream}</Markdown>
+                                                <Markdown>
+                                                    {responseStream}
+                                                </Markdown>
                                             </ChatBubble>
                                         )}
                                 </div>
-                                {!history.length && (
+                                {!history.length && !responseErrored && (
                                     <div>
                                         {suggested_questions.map((q, i) => (
                                             <ChatBubble
