@@ -19,7 +19,7 @@ async function generateZipFile(files) {
     const zipFilePath = `${filesDirPath}.zip`;
     await fsp.mkdir(filesDirPath);
     for (let i = 0; i < files.length; i++) {
-        await fsp.writeFile(path.join(filesDirPath, files[i].filename), files[i].file);
+        await fsp.writeFile(path.join(filesDirPath, files[i].filename), files[i]._buf);
     }
     await zip.archiveFolder(filesDirPath, zipFilePath);
     return { zipFilePath, filesDirPath };
