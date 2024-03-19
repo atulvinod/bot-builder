@@ -1,0 +1,1 @@
+ALTER TABLE "bot_details" ADD COLUMN "is_private" boolean DEFAULT false NOT NULL;

@@ -29,23 +29,35 @@ import {
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import ConfirmDialogBox from "@/app/shared/components/confirmation_dialog";
+import { deleteBot } from "@/lib/actions/bot";
+import { toast } from "sonner";
 
 export default function BotDetailsPage({
     params,
 }: {
     params: { bot_id: number };
 }) {
+    const router = useRouter();
+
     const getBotDetails = async (): Promise<
         typeof schema.botDetails.$inferSelect
     > => {
         const response = await fetch(`/api/bot?bot_id=${params.bot_id}`);
+        if (!response.ok) {
+            if (response.status == 404) {
+                router.replace("/not-found");
+            }
+        }
         const responseBody = await response.json();
         return responseBody.data.details;
     };
 
-    const router = useRouter();
-
-    const { data: botDetails, isLoading } = useQuery({
+    const {
+        data: botDetails,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ["bot_details"],
         queryFn: getBotDetails,
     });
@@ -229,6 +241,7 @@ function TrainingFilesView({ data }: { data: TrainingFilesConfig }) {
 
 function ActionButtons({ status, bot_id }: { status: string; bot_id: number }) {
     const router = useRouter();
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
     return (
         <div className="flex ">
@@ -263,10 +276,28 @@ function ActionButtons({ status, bot_id }: { status: string; bot_id: number }) {
                 )}
             </div>
             {status == "created" && (
-                <AppButton
-                    variant={ButtonVariants.Danger}
-                    buttonText={"Delete"}
-                ></AppButton>
+                <ConfirmDialogBox
+                    text="Are you sure you want to delete this bot?, this action is irreversible"
+                    title="Are you sure?"
+                    is_dialog_open={isDialogOpen}
+                    set_dialog_open={setIsDialogOpen}
+                    on_confirm={async () => {
+                        try {
+                            toast.info("Deleting bot");
+                            await deleteBot(bot_id);
+                            router.push("/dashboard/bots");
+                        } catch (e) {
+                            toast.error(
+                                "Failed to delete the bot, please try again later"
+                            );
+                        }
+                    }}
+                >
+                    <AppButton
+                        variant={ButtonVariants.Danger}
+                        buttonText={"Delete"}
+                    ></AppButton>
+                </ConfirmDialogBox>
             )}
         </div>
     );

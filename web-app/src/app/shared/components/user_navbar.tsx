@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { LogOut, LogIn } from "lucide-react";
 import GoogleButton from "react-google-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Bot } from "lucide-react";
+import Link from "next/link";
+import "./navbar.styles.css";
 
 export default function NavbarUser() {
     return (
@@ -27,26 +30,37 @@ function User() {
     return (
         <div>
             {session.status == "authenticated" && (
-                <Popover>
-                    <PopoverTrigger>
-                        <AvatarImage path={session.data?.user?.image} />
-                    </PopoverTrigger>
-                    <PopoverContent>
-                        <h1 className="font-semibold">
-                            Hello {session.data?.user?.name}
-                        </h1>
-                        <hr className="my-2" />
-                        <div className="mt-2">
-                            <Button
-                                variant={"secondary"}
-                                onClick={() => signOut()}
-                            >
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Logout
-                            </Button>
-                        </div>
-                    </PopoverContent>
-                </Popover>
+                <div className="flex items-center">
+                    <ul className="navbar-links mr-10">
+                        <li className="hover:underline">
+                            <Link href="/dashboard/bots">
+                                <Bot className="mb-0.5" />
+                                <span className="ml-1 text-lg">Your bots</span>
+                            </Link>
+                        </li>
+                    </ul>
+
+                    <Popover>
+                        <PopoverTrigger>
+                            <AvatarImage path={session.data?.user?.image} />
+                        </PopoverTrigger>
+                        <PopoverContent>
+                            <h1 className="font-semibold">
+                                Hello {session.data?.user?.name}
+                            </h1>
+                            <hr className="my-2" />
+                            <div className="mt-2">
+                                <Button
+                                    variant={"secondary"}
+                                    onClick={() => signOut()}
+                                >
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Logout
+                                </Button>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
             )}
             {session.status == "unauthenticated" && (
                 <div className="flex ">

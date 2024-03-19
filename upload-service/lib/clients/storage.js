@@ -29,7 +29,7 @@ async function generateZipFile(files) {
  * 
  * @param {string} folder 
  * @param {string} file_name 
- * @param {File} file 
+ * @param {{_buf: Buffer, mimetype:String}} file 
  */
 async function uploadFile(
     folder,
@@ -38,8 +38,8 @@ async function uploadFile(
 ) {
     const root = getStorage(app);
     const folderRef = ref(root, `${folder}/${file_name}`);
-    const result = await uploadBytes(folderRef, file.file, {
-        contentType: "",
+    const result = await uploadBytes(folderRef, file._buf, {
+        contentType: file.mimetype,
     });
     return result;
 }

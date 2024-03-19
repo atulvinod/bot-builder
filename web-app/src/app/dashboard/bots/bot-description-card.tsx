@@ -14,7 +14,9 @@ export default function BotDescription({
     bot_name,
     bot_description,
     status,
+    navigate_to_desc = true,
 }: {
+    navigate_to_desc?: boolean;
     bot_id: number;
     avatar_image?: string | null;
     bot_name: string;
@@ -25,7 +27,7 @@ export default function BotDescription({
     return (
         <div
             className="rounded-lg bg-appGrey p-5  cursor-pointer transition-all hover:shadow-lg"
-            onClick={() => window.open(botLink)}
+            onClick={() => (navigate_to_desc ? window.open(botLink) : null)}
         >
             <div className="h-full flex flex-col">
                 <div className="flex flex-row items-center">
@@ -38,9 +40,12 @@ export default function BotDescription({
                     </p>
                 </div>
                 <div className="mt-3">
-                    {["queued", "inprogress", "failed_queue_push"].includes(
-                        status
-                    ) && (
+                    {[
+                        "queued",
+                        "inprogress",
+                        "failed_queue_push",
+                        "failed",
+                    ].includes(status) && (
                         <Badge
                             variant={"outline"}
                             className="bg-yellow-100 h-7"

@@ -1,0 +1,4 @@
+.navbar-links a {
+    display: flex;
+    align-items: center;
+}

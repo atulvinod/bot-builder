@@ -1,3 +1,4 @@
+const IS_PRIVATE = "IS_PRIVATE";
 const TRAINING_DATA_FILE = "TRAINING_DATA_FILE";
 const TRAINING_DATA_TYPES = "TRAINING_DATA_TYPES";
 const BOT_NAME = "BOT_NAME";
@@ -27,5 +28,6 @@ module.exports = {
     TRAINING_SPEC,
     inputTypeToFormKeyMap,
     DEFAULT_AVATAR,
-    TrainingAssetTypes
+    TrainingAssetTypes,
+    IS_PRIVATE
 };

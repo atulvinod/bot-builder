@@ -43,6 +43,13 @@
       "when": 1709023589564,
       "tag": "0005_magenta_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1710823193531,
+      "tag": "0006_woozy_maximus",
+      "breakpoints": true
     }
   ]
 }

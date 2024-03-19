@@ -36,8 +36,10 @@ import TrainingFilesInputV2, {
 } from "@/app/shared/components/file_training_data_input";
 import Link from "next/link";
 import { SessionProvider, useSession } from "next-auth/react";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
+    is_private: z.boolean({ required_error: "Is private bot required" }),
     botname: z
         .string({ required_error: "Botname is required" })
         .min(
@@ -123,6 +125,10 @@ export function Content() {
             constants.BOT_DESCRIPTION,
             formData.bot_description
         );
+        uploadFormPayload.append(
+            constants.IS_PRIVATE,
+            formData.is_private
+        )
         if (avatarImage) {
             uploadFormPayload.append(constants.BOT_AVATAR, avatarImage);
         }
@@ -210,14 +216,41 @@ export function Content() {
                                     }
                                 ></AppButton>
                             </HeadingWithSideActionButton>
-                            <div>
-                                <div className="w-[50%]">
+                            <div className="flex">
+                                <div className="flex-1">
+                                    <FormField
+                                        control={form.control}
+                                        name="is_private"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                                <div className="space-y-0.5">
+                                                    <FormLabel>
+                                                        Is your bot private?
+                                                    </FormLabel>
+                                                    <FormDescription>
+                                                        Private bots are not
+                                                        displayed on the main
+                                                        home page and are only
+                                                        accessible by you
+                                                    </FormDescription>
+                                                </div>
+                                                <FormControl>
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="botname"
                                         render={({ field }) => (
-                                            <div>
-                                                <FormLabel className="text-lg">
+                                            <div className="mt-2">
+                                                <FormLabel className="text-lg mt-2">
                                                     Name
                                                 </FormLabel>
                                                 <div className="flex flex-row items-start">
@@ -287,7 +320,9 @@ export function Content() {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="mt-10">
+                                </div>
+                                <div className="flex-1 ml-10">
+                                    <div>
                                         <FormLabel
                                             className={
                                                 "text-lg " +

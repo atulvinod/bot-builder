@@ -36,6 +36,7 @@ export const botDetails = pgTable("bot_details", {
     is_deleted: boolean("is_deleted").default(false),
     avatar_image: text("avatar_image"),
     assets_id: text("assets_id"),
+    is_private: boolean("is_private").default(false).notNull(),
 });
 
 export const chatSessions = pgTable("chat_sessions", {
