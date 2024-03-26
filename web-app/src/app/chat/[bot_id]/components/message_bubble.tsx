@@ -47,7 +47,6 @@ export default function ChatBubble({
                 {isError && type == "user" && (
                     <RefreshCcw
                         className="mr-3 cursor-pointer"
-                        onClick={onClick}
                     />
                 )}
                 <div
