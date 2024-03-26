@@ -103,35 +103,45 @@ def getAgent(bot_id:int, user_session_key:str="system"):
 
 
 def getResponseStreamForQuery(bot_id: int, user_session_key, user_question: str):
-    (agent, chat_history) = getAgent(bot_id, user_session_key)    
-    responseText = ""
+    try:
+        (agent, chat_history) = getAgent(bot_id, user_session_key)
+        responseText = ""
+        for x in agent.stream_chat(user_question).response_gen:
+            responseText += x
+            yield x
 
-    for x in agent.stream_chat(user_question).response_gen:
-        responseText += x
-        yield x
-
-    if len(responseText) != 0:
-        updateChatHistory(
-            bot_id,
-            user_session_key,
-            chat_history,
-            [
-                ChatMessage(role=MessageRole.USER, content=user_question),
-                ChatMessage(role=MessageRole.ASSISTANT, content=responseText),
-            ],
-        )
+        if len(responseText) != 0:
+            updateChatHistory(
+                bot_id,
+                user_session_key,
+                chat_history,
+                [
+                    ChatMessage(role=MessageRole.USER, content=user_question),
+                    ChatMessage(role=MessageRole.ASSISTANT, content=responseText),
+                ],
+            )
+        else:
+            logging.error("No response received from AI")
+    except Exception as e:
+        logging.error("API response error " + str(e))
 
 def getResponseTextForQuery(bot_id, user_session_key, user_question: str):
-    (agent, chat_history) = getAgent(bot_id, user_session_key)
-    response = agent.chat(user_question).response
-    updateChatHistory(
-        bot_id,
-        chat_history,
-         [
-            ChatMessage(role=MessageRole.USER, content=user_question),
-            ChatMessage(role=MessageRole.ASSISTANT, content=response),
-        ],
-    )
+    try:
+        (agent, chat_history) = getAgent(bot_id, user_session_key)
+        response = agent.chat(user_question).response
+        if len(response) != 0:
+            updateChatHistory(
+                bot_id,
+                chat_history,
+                [
+                    ChatMessage(role=MessageRole.USER, content=user_question),
+                    ChatMessage(role=MessageRole.ASSISTANT, content=response),
+                ],
+            )
+        else:
+            logging.error("Response has no length")
+    except Exception as e:
+        logging.error("API Response error " + str(e))
 
 def getSuggestedQuestions(bot_id):
     try:
